@@ -1,0 +1,156 @@
+<?php $post = $admin['post']; ?>
+<div class="d-flex justify-content-between align-items-center py-3 mb-4">
+    <h4 class="mb-0">
+        <span class="text-muted fw-light">Content / Blog /</span> <?= $post['id'] ? 'Edit Post' : 'New Post' ?>
+    </h4>
+    <a href="<?= $adminUrl('blog/') ?>" class="btn btn-label-secondary">
+        <i class="bx bx-arrow-back me-1"></i> All posts
+    </a>
+</div>
+
+<div id="blogResult" class="alert d-none"></div>
+
+<form id="blogForm" autocomplete="off">
+    <input type="hidden" id="blogId" value="<?= (int) $post['id'] ?>">
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="blogTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="blogTitle" maxlength="255" required
+                            value="<?= \htmlspecialchars($post['title']) ?>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="blogBody" class="form-label">Post</label>
+                        <textarea id="blogBody"><?= \htmlspecialchars($post['body']) ?></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><h6 class="mb-0">Images</h6></div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <?php foreach ([
+                            ['id' => 'blogHero', 'label' => 'Hero image', 'help' => 'Shown at the top of the post and on the blog index.', 'value' => $post['heroImage']],
+                            ['id' => 'blogSocial', 'label' => 'Social image', 'help' => 'Used for link previews. Defaults to the hero image.', 'value' => $post['socialImage']],
+                        ] as $slot): ?>
+                            <div class="col-md-6" data-image-slot="<?= $slot['id'] ?>">
+                                <label class="form-label"><?= $slot['label'] ?></label>
+                                <input type="hidden" id="<?= $slot['id'] ?>Value" value="<?= \htmlspecialchars($slot['value']) ?>">
+                                <div class="border rounded mb-2 d-flex align-items-center justify-content-center bg-light" style="height: 150px; overflow: hidden;">
+                                    <img id="<?= $slot['id'] ?>Preview" alt="" class="mw-100 mh-100 <?= $slot['value'] ? '' : 'd-none' ?>"
+                                        src="<?= \htmlspecialchars($slot['value']) ?>">
+                                    <span id="<?= $slot['id'] ?>Empty" class="text-muted small <?= $slot['value'] ? 'd-none' : '' ?>">No image</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-label-primary" data-image-choose><i class="bx bx-upload me-1"></i> Choose image</button>
+                                <button type="button" class="btn btn-sm btn-label-secondary <?= $slot['value'] ? '' : 'd-none' ?>" data-image-remove>Remove</button>
+                                <div class="form-text"><?= $slot['help'] ?></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="blogPublished" <?= $post['isPublished'] ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="blogPublished">Published</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="blogPublishedAt" class="form-label">Publish date</label>
+                        <input type="datetime-local" class="form-control" id="blogPublishedAt" value="<?= \htmlspecialchars($post['publishedAt']) ?>">
+                        <div class="form-text">Left empty, it is set when the post is first published.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="blogAuthor" class="form-label">Author</label>
+                        <select class="form-select" id="blogAuthor">
+                            <?php foreach ($admin['authors'] as $author): ?>
+                                <option value="<?= (int) $author['id'] ?>" <?= (int) $author['id'] === $post['authorUserId'] ? 'selected' : '' ?>>
+                                    <?= \htmlspecialchars(\trim($author['first_name'] . ' ' . $author['last_name'])) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="blogSaveButton">Save</button>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header"><h6 class="mb-0">Search and sharing</h6></div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="blogSlug" class="form-label">Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text">/blog/</span>
+                            <input type="text" class="form-control" id="blogSlug" maxlength="120"
+                                value="<?= \htmlspecialchars($post['slug']) ?>">
+                        </div>
+                        <div class="form-text">Changing it redirects the old address.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="blogDescription" class="form-label">Meta description</label>
+                        <textarea class="form-control" id="blogDescription" rows="3" maxlength="320"><?= \htmlspecialchars($post['description']) ?></textarea>
+                    </div>
+                    <div class="mb-0">
+                        <label for="blogExcerpt" class="form-label">Excerpt</label>
+                        <textarea class="form-control" id="blogExcerpt" rows="3"><?= \htmlspecialchars($post['excerpt']) ?></textarea>
+                        <div class="form-text">Short summary for the blog index.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="modal fade" id="blogLinkModal" tabindex="-1" aria-labelledby="blogLinkModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blogLinkModalLabel">Link to a page</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="search" class="form-control mb-3" id="blogLinkSearch" placeholder="Search pages, categories, products and posts" autocomplete="off">
+                <div class="list-group" id="blogLinkList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="blogImageModal" tabindex="-1" aria-labelledby="blogImageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="blogImageModalLabel">Add image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <img id="blogImagePreview" alt="" class="mw-100 mb-3 d-none" style="max-height: 220px;">
+                <div id="blogImageStatus" class="text-muted small mb-3"></div>
+                <label for="blogImageAlt" class="form-label">Description (alt text)</label>
+                <input type="text" class="form-control" id="blogImageAlt" maxlength="200" autocomplete="off">
+                <div class="form-text">Describes the picture for screen readers and search engines.</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="blogImageInsert" disabled>Insert</button>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="file" id="blogImageFile" class="d-none" accept="image/jpeg,image/png,image/webp,image/avif">
+
+<script>
+    window.BlogConfig = {
+        basePath: adminBasePath,
+        listUrl: <?= \json_encode($adminUrl('blog/')) ?>,
+        editUrl: <?= \json_encode($adminUrl('blog/edit/')) ?>
+    };
+</script>
+<script src="/assets/services/blog/blog-edit.js<?= $adminAssetVersion('/assets/services/blog/blog-edit.js') ?>"></script>

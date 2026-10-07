@@ -1,0 +1,3 @@
+ALTER TABLE {PREFIX}blog_posts
+    ADD COLUMN hero_image VARCHAR(255) DEFAULT NULL AFTER body,
+    ADD COLUMN social_image VARCHAR(255) DEFAULT NULL AFTER hero_image;
