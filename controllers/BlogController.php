@@ -200,13 +200,18 @@ class BlogController extends AdminController
     }
 
     /**
-     * Publishing stamps the date once; a date typed into the editor wins; a draft keeps whatever it had
+     * Publishing stamps the date once; a date typed into the editor wins, but never a future one: a published
+     * post is live now (no scheduling), so a draft is the only unpublished state and the only noindex one
      */
     private function publishedAt(array $input, bool $isPublished): ?string
     {
         $typed = \trim((string) ($input['published_at'] ?? ''));
         $typedTime = $typed === '' ? false : \strtotime($typed);
-        if ($typedTime !== false) return \date('Y-m-d H:i:s', $typedTime);
+        if ($typedTime !== false) {
+            $time = $isPublished ? \min($typedTime, \time()) : $typedTime;
+
+            return \date('Y-m-d H:i:s', $time);
+        }
 
         return $isPublished ? \date('Y-m-d H:i:s') : null;
     }

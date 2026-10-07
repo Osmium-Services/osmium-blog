@@ -46,7 +46,7 @@ class BlogClaim
     }
 
     /**
-     * A signed-in, unlocked admin may view a draft or scheduled post on the site; everyone else gets the 404.
+     * A signed-in, unlocked admin may view a draft post on the site; everyone else gets the 404.
      */
     private static function isAdminSession(): bool
     {

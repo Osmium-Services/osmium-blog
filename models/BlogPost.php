@@ -30,7 +30,7 @@ class BlogPost extends Model
     }
 
     /**
-     * The post behind a pages row whatever its state (draft, scheduled or published), for an admin's preview
+     * The post behind a pages row whatever its state (draft or published), for an admin's preview
      */
     public function findByPageId(int $pageId): ?array
     {
