@@ -33,6 +33,7 @@
                     "id": "blog",
                     "label": "Blog",
                     "icon": "bx bx-news",
+                    "placement": "top",
                     "route": "admin/blog",
                     "activePattern": "admin/blog*",
                     "role": null
