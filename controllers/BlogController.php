@@ -123,7 +123,7 @@ class BlogController extends AdminController
             'url' => self::URL_PREFIX . $slug,
             'title' => $title,
             'description' => \trim((string) ($input['description'] ?? '')),
-            'robots' => 'index,follow',
+            'robots' => $isPublished ? 'index,follow' : 'noindex,nofollow', // A draft stays out of the sitemap
             'parent_page_id' => $this->blogIndexPageId(),
         ];
 

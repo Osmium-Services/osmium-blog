@@ -30,6 +30,18 @@ class BlogPost extends Model
     }
 
     /**
+     * The post behind a pages row whatever its state (draft, scheduled or published), for an admin's preview
+     */
+    public function findByPageId(int $pageId): ?array
+    {
+        $this->database->query($this->loadSqlFile('blog-post-get-by-page.sql'));
+        $this->database->bind(param: ':page_id', value: $pageId);
+        $post = $this->database->single();
+
+        return $post === false ? null : $post;
+    }
+
+    /**
      * Every post with its page's url and title and its author's name, newest first
      */
     public function listAll(): array
