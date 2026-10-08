@@ -305,6 +305,7 @@ class BlogController extends AdminController
             'status_label' => $isPublished ? 'Published' : 'Draft',
             'status_class' => $isPublished ? 'success' : 'secondary',
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',
+            'date_sort' => (string) $date,
         ];
     }
 

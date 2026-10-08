@@ -13,8 +13,8 @@ return [
         'title' => 'Posts',
         'noun' => ['post', 'posts'],
         'endpoint' => 'blog/action/',
-        'datatable' => false,
         'emptyText' => 'No posts yet. Use New Post to write the first.',
+        'order' => null, // keep the server's newest-first order until a header is clicked
         'columns' => [
             [
                 'key' => 'title',
@@ -34,7 +34,7 @@ return [
                 'classKey' => 'status_class',
                 'classPrefix' => 'bg-label-',
             ],
-            ['key' => 'date_label', 'label' => 'Date', 'type' => 'text', 'nowrap' => true],
+            ['key' => 'date_label', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'date_sort'],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'url' => '{edit_url}'],

@@ -17,8 +17,7 @@ namespace Osmium\Services\Blog\Models;
  */
 class BlogClaim
 {
-    // One index page lists every post. Paging needs path-based URLs (core drops query strings on public
-    // pages, so ?page=2 would be uncrawlable), which a pages row per page cannot give.
+    // One index page lists every post. Paging is not built yet.
     private const INDEX_LIMIT = 500;
     public const INDEX_SLUG = 'blog';
 
