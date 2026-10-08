@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Osmium\Modules\Admin\Core\ListView;
+
 /**
  * Blog posts list, rendered by Osmium\Modules\Admin\Core\ListView. Rows are shaped by BlogController::formatPost().
  */
@@ -41,9 +43,31 @@ return [
                 'label' => 'Delete',
                 'icon' => 'bx-trash',
                 'action' => 'delete',
-                'confirm' => 'Delete this post? Its page is removed too.',
+                'confirm' => 'Delete this post? It moves to Deleted Posts, where it can be restored.',
                 'danger' => true,
             ],
         ],
     ],
+
+    'deleted' => ListView::deletedPreset(
+        definition: [
+            'id' => 'blog-posts-deleted',
+            'title' => 'Deleted Posts',
+            'noun' => ['post', 'posts'],
+            'endpoint' => 'blog/action/',
+            'columns' => [
+                [
+                    'key' => 'title',
+                    'label' => 'Post',
+                    'type' => 'text',
+                    'strong' => true,
+                    'fallback' => 'Untitled',
+                    'fill' => true,
+                    'sub' => ['key' => 'url_path', 'style' => 'plain'],
+                ],
+                ['key' => 'author_name', 'label' => 'Author', 'type' => 'text', 'nowrap' => true, 'fallback' => '-'],
+            ],
+        ],
+        permanentConfirm: 'Permanently delete this post and its page? This cannot be undone!',
+    ),
 ];

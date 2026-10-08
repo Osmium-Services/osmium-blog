@@ -51,6 +51,28 @@ class BlogPost extends Model
         return $this->database->resultset();
     }
 
+    /**
+     * Every post whose page is in the bin, with its page's url and title, most recently deleted first
+     */
+    public function listDeleted(): array
+    {
+        $this->database->query($this->loadSqlFile('blog-post-list-deleted.sql'));
+
+        return $this->database->resultset();
+    }
+
+    /**
+     * A post whose page is in the bin, or null when the post is not there or is not deleted
+     */
+    public function getDeletedById(int $id): ?array
+    {
+        $this->database->query($this->loadSqlFile('blog-post-get-deleted.sql'));
+        $this->database->bind(param: ':id', value: $id);
+        $post = $this->database->single();
+
+        return $post === false ? null : $post;
+    }
+
     public function getById(int $id): ?array
     {
         $this->database->query($this->loadSqlFile('blog-post-get.sql'));
@@ -145,7 +167,7 @@ class BlogPost extends Model
     }
 
     /**
-     * Every pages row a post sits behind, as post id and page id, for the admin Pages list
+     * Every pages row a post sits behind (binned pages too, so the Pages bin cannot permanently delete one), as post id and page id, for the admin Pages list
      */
     public function ownedPages(): array
     {

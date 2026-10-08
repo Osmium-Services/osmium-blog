@@ -35,6 +35,7 @@ class BlogController extends AdminController
 
         $this->data['admin']['isAdmin'] = $this->isAdmin();
         $this->data['admin']['posts'] = \array_map($this->formatPost(...), $posts);
+        $this->data['admin']['deletedPosts'] = \array_map($this->formatPost(...), (new BlogPost($this->osmium->dataSource))->listDeleted());
         $this->data['admin']['lists'] = require __DIR__ . '/../lists/posts.php';
 
         $this->setView('blog/index.phtml');
@@ -85,6 +86,8 @@ class BlogController extends AdminController
             $result = match ($action) {
                 'save' => $this->save(id: $id, input: $input),
                 'delete' => $this->deletePost($id),
+                'restore' => $this->restorePost($id),
+                'permanently_delete' => $this->permanentlyDeletePost($id),
                 'upload_image' => $this->uploadImage($_FILES['image'] ?? []),
                 'link_targets' => ['success' => true, 'targets' => $this->linkTargets()],
                 default => throw new \InvalidArgumentException('Unknown action'),
@@ -184,17 +187,47 @@ class BlogController extends AdminController
         return BlogImages::isBlogImage($path) ? $path : null;
     }
 
+    /**
+     * Soft delete: the page goes to the Pages bin and the post row stays, so a restore brings it all back
+     */
     private function deletePost(int $id): array
     {
-        $model = new BlogPost($this->osmium->dataSource);
-        $post = $model->getById($id);
+        $post = (new BlogPost($this->osmium->dataSource))->getById($id);
         if (!$post) throw new \InvalidArgumentException('Post not found');
 
-        // The page goes for good, not to the Pages bin: the post is gone either way, a restored page
-        // would be an empty 404, and a soft-deleted row would keep the address from being reused
+        $this->pages()->delete(id: (int) $post['page_id'], input: []);
+        $this->logChange(action: 'Deleted', id: $id, name: (string) $post['title']);
+
+        return ['success' => true];
+    }
+
+    private function restorePost(int $id): array
+    {
+        $post = (new BlogPost($this->osmium->dataSource))->getDeletedById($id);
+        if (!$post) throw new \InvalidArgumentException('Deleted post not found');
+
+        $this->pages()->restore((int) $post['page_id']);
+        $this->logChange(action: 'Restored', id: $id, name: (string) $post['title']);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Admins only, and only from the bin. The page goes for good too: a restored page would be an empty 404,
+     * and a soft-deleted row would keep the address from being reused
+     */
+    private function permanentlyDeletePost(int $id): array
+    {
+        $notAdmin = !$this->isAdmin();
+        if ($notAdmin) throw new \RuntimeException('Permission denied');
+
+        $model = new BlogPost($this->osmium->dataSource);
+        $post = $model->getDeletedById($id);
+        if (!$post) throw new \InvalidArgumentException('Deleted post not found');
+
         $model->delete($id);
         $this->pages()->permanentDelete((int) $post['page_id']);
-        $this->logChange(action: 'Deleted', id: $id, name: (string) $post['title']);
+        $this->logChange(action: 'Permanently deleted', id: $id, name: (string) $post['title']);
 
         return ['success' => true];
     }
