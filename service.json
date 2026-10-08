@@ -37,6 +37,14 @@
                     "route": "admin/blog",
                     "activePattern": "admin/blog*",
                     "role": null
+                },
+                {
+                    "id": "settings",
+                    "label": "Blog",
+                    "icon": "bx bx-news",
+                    "route": "admin/settings/blog",
+                    "activePattern": "admin/settings/blog",
+                    "role": "admin"
                 }
             ]
         },
@@ -52,6 +60,12 @@
                 "class": "Osmium\\Services\\Blog\\Controllers\\BlogController",
                 "method": "edit",
                 "title": "Edit Post"
+            },
+            "admin/settings/blog": {
+                "controller": "controllers/SettingsController.php",
+                "class": "Osmium\\Services\\Blog\\Controllers\\SettingsController",
+                "method": "index",
+                "title": "Blog Settings"
             },
             "admin/blog/action": {
                 "controller": "controllers/BlogController.php",

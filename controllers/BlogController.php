@@ -9,6 +9,7 @@ use Osmium\Modules\Admin\Services\AdminPages;
 use Osmium\Services\Blog\Models\BlogClaim;
 use Osmium\Services\Blog\Models\BlogImages;
 use Osmium\Services\Blog\Models\BlogPost;
+use Osmium\Services\Blog\Models\BlogSettings;
 
 /**
  * Blog admin - posts list, the editor, and the AJAX actions behind them.
@@ -60,7 +61,7 @@ class BlogController extends AdminController
             'heroImage' => $post['hero_image'] ?? '',
             'socialImage' => $post['social_image'] ?? '',
             'body' => $post['body'] ?? '',
-            'authorUserId' => (int) ($post['author_user_id'] ?? $this->getCurrentUserId()),
+            'authorUserId' => (int) ($post['author_user_id'] ?? (BlogSettings::get()['defaultAuthorId'] ?: $this->getCurrentUserId())),
             'isPublished' => (bool) ($post['is_published'] ?? false),
             'publishedAt' => isset($post['published_at']) ? \date('Y-m-d\TH:i', \strtotime($post['published_at'])) : '',
         ];
