@@ -36,6 +36,7 @@ class BlogController extends AdminController
         $this->data['admin']['isAdmin'] = $this->isAdmin();
         $this->data['admin']['posts'] = \array_map($this->formatPost(...), $posts);
         $this->data['admin']['deletedPosts'] = \array_map($this->formatPost(...), (new BlogPost($this->osmium->dataSource))->listDeleted());
+        $this->data['admin']['redirectTargets'] = $this->linkTargets();
         $this->data['admin']['lists'] = require __DIR__ . '/../lists/posts.php';
 
         $this->setView('blog/index.phtml');
@@ -85,7 +86,7 @@ class BlogController extends AdminController
         try {
             $result = match ($action) {
                 'save' => $this->save(id: $id, input: $input),
-                'delete' => $this->deletePost($id),
+                'delete' => $this->deletePost($id, (string) ($input['redirect_target'] ?? '')),
                 'restore' => $this->restorePost($id),
                 'permanently_delete' => $this->permanentlyDeletePost($id),
                 'upload_image' => $this->uploadImage($_FILES['image'] ?? []),
@@ -188,14 +189,19 @@ class BlogController extends AdminController
     }
 
     /**
-     * Soft delete: the page goes to the Pages bin and the post row stays, so a restore brings it all back
+     * Soft delete: the page goes to the Pages bin and the post row stays, so a restore brings it all back.
+     * An optional redirect sends the old address to another page of the site until the post is restored
      */
-    private function deletePost(int $id): array
+    private function deletePost(int $id, string $redirectTarget): array
     {
         $post = (new BlogPost($this->osmium->dataSource))->getById($id);
         if (!$post) throw new \InvalidArgumentException('Post not found');
 
-        $this->pages()->delete(id: (int) $post['page_id'], input: []);
+        $redirectTarget = \trim($redirectTarget);
+        $isSitePath = $redirectTarget === '' || (\str_starts_with($redirectTarget, '/') && !\str_starts_with($redirectTarget, '//'));
+        if (!$isSitePath) throw new \InvalidArgumentException('Redirect to a page of this site, starting with /');
+
+        $this->pages()->delete(id: (int) $post['page_id'], input: ['redirect_target' => $redirectTarget]);
         $this->logChange(action: 'Deleted', id: $id, name: (string) $post['title']);
 
         return ['success' => true];

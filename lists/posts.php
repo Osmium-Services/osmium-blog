@@ -42,8 +42,7 @@ return [
             [
                 'label' => 'Delete',
                 'icon' => 'bx-trash',
-                'action' => 'delete',
-                'confirm' => 'Delete this post? It moves to Deleted Posts, where it can be restored.',
+                'event' => 'delete',
                 'danger' => true,
             ],
         ],
