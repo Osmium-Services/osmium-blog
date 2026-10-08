@@ -145,7 +145,14 @@
         if (file && onFileChosen) onFileChosen(file);
     });
 
+    let bodyContext = null;
+
+    function isImageFile(file) {
+        return Boolean(file) && /^image\/(jpeg|png|webp|avif)$/.test(file.type);
+    }
+
     function pictureButton(context) {
+        bodyContext = context;
         return $.summernote.ui.button({
             contents: '<span title="Add an image"><i class="note-icon-picture"></i> Image</span>',
             click: function () {
@@ -217,18 +224,37 @@
             remove.classList.toggle('d-none', !has);
         }
 
-        choose.addEventListener('click', function () {
-            chooseImage(async function (file) {
-                choose.disabled = true;
-                try {
-                    const data = await uploadImage(file);
-                    value.value = data.url;
-                    show();
-                } catch (error) {
-                    showResult(error.message, 'danger');
-                }
-                choose.disabled = false;
-            });
+        async function setSlotImage(file) {
+            choose.disabled = true;
+            try {
+                const data = await uploadImage(file);
+                value.value = data.url;
+                show();
+            } catch (error) {
+                showResult(error.message, 'danger');
+            }
+            choose.disabled = false;
+        }
+
+        choose.addEventListener('click', function () { chooseImage(setSlotImage); });
+
+        // Drag an image file onto the slot's preview box
+        const dropBox = preview.parentElement;
+        dropBox.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            dropBox.classList.add('border-primary');
+        });
+        dropBox.addEventListener('dragleave', function () { dropBox.classList.remove('border-primary'); });
+        dropBox.addEventListener('drop', function (event) {
+            event.preventDefault();
+            dropBox.classList.remove('border-primary');
+
+            const file = event.dataTransfer.files[0];
+            if (!isImageFile(file)) {
+                showResult('Drop a JPEG, PNG, WebP or AVIF image.', 'danger');
+                return;
+            }
+            setSlotImage(file);
         });
         remove.addEventListener('click', function () {
             value.value = '';
@@ -255,6 +281,18 @@
             ['view', ['codeview']]
         ],
         buttons: { pageLink: pageLinkButton, blogImage: pictureButton },
+        // Dropped or pasted image files take the same route as the Image button: upload, then ask for alt text
+        callbacks: {
+            onImageUpload: function (files) {
+                const file = files[0];
+                if (!isImageFile(file)) {
+                    showResult('Drop a JPEG, PNG, WebP or AVIF image.', 'danger');
+                    return;
+                }
+                bodyContext.invoke('editor.saveRange');
+                startBodyImage(bodyContext, file);
+            }
+        },
         styleTags: ['p', 'h2', 'h3', 'h4', 'blockquote']
     });
 
