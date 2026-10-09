@@ -58,7 +58,7 @@ $listContext = [
     </div>
 </div>
 
-<script>
+<script nonce="<?= $cspNonce ?? '' ?>">
     window.BlogList = {
         endpoint: <?= \json_encode($adminUrl('blog/action/')) ?>,
         posts: <?= \json_encode(\array_column(
