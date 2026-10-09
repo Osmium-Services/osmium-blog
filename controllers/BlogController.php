@@ -48,6 +48,7 @@ class BlogController extends AdminController
         $model = new BlogPost($this->osmium->dataSource);
 
         $id = (int) $this->osmium->getStashedParam(key: 'id', default: 0); // Core moves query params out of $_GET
+        $this->osmium->clearStashedQuerystring(); // Or a later "New Post" would reopen this post
         $post = $id ? $model->getById($id) : null;
         if ($id && !$post) $this->redirect('blog/');
 
