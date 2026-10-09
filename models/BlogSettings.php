@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Osmium\Services\Blog\Models;
 
 /**
- * This service's settings, read from app/config/services/blog.json.php (the file-based convention the
+ * This service's settings, read from app/config/services/osmium-blog.json.php (the file-based convention the
  * other services use). Missing file means the defaults: a new post is credited to whoever is writing it.
  */
 class BlogSettings
 {
-    public const CONFIG_PATH = 'app/config/services/blog.json.php';
+    public const CONFIG_PATH = 'app/config/services/osmium-blog.json.php';
 
     private static ?array $settings = null;
 
