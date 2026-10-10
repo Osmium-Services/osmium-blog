@@ -6,6 +6,7 @@ namespace Osmium\Services\Blog\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Modules\Admin\Services\AdminPages;
+use Osmium\Services\Blog\Models\BlogBin;
 use Osmium\Services\Blog\Models\BlogClaim;
 use Osmium\Services\Blog\Models\BlogImages;
 use Osmium\Services\Blog\Models\BlogPost;
@@ -196,26 +197,14 @@ class BlogController extends AdminController
      */
     private function deletePost(int $id, string $redirectTarget): array
     {
-        $post = (new BlogPost($this->osmium->dataSource))->getById($id);
-        if (!$post) throw new \InvalidArgumentException('Post not found');
-
-        $redirectTarget = \trim($redirectTarget);
-        $isSitePath = $redirectTarget === '' || (\str_starts_with($redirectTarget, '/') && !\str_starts_with($redirectTarget, '//'));
-        if (!$isSitePath) throw new \InvalidArgumentException('Redirect to a page of this site, starting with /');
-
-        $this->pages()->delete(id: (int) $post['page_id'], input: ['redirect_target' => $redirectTarget]);
-        $this->logChange(action: 'Deleted', id: $id, name: (string) $post['title']);
+        $this->bin()->delete($id, $redirectTarget);
 
         return ['success' => true];
     }
 
     private function restorePost(int $id): array
     {
-        $post = (new BlogPost($this->osmium->dataSource))->getDeletedById($id);
-        if (!$post) throw new \InvalidArgumentException('Deleted post not found');
-
-        $this->pages()->restore((int) $post['page_id']);
-        $this->logChange(action: 'Restored', id: $id, name: (string) $post['title']);
+        $this->bin()->restore($id);
 
         return ['success' => true];
     }
@@ -268,10 +257,14 @@ class BlogController extends AdminController
     private function pages(): AdminPages
     {
         return new AdminPages(
-            dataSource: $this->osmium->dataSource,
-            sqlDir: 'app/modules/admin/models/sql/',
+            page: $this->admin->model->page,
             urlTrailingSlash: $this->osmium->config->site->urlTrailingSlash ?? false,
         );
+    }
+
+    private function bin(): BlogBin
+    {
+        return new BlogBin(new BlogPost($this->osmium->dataSource), $this->pages(), $this->logChange(...));
     }
 
     /**

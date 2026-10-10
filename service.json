@@ -1,7 +1,7 @@
 {
     "id": "osmium-blog",
     "name": "Osmium Blog",
-    "version": "0.6.2",
+    "version": "0.7.0",
     "description": "Blog posts written in admin and published as ordinary pages under /blog/, with the markup supplied by the theme",
     "category": "content",
     "author": {
@@ -23,6 +23,9 @@
         ],
         "pages.owners": [
             "Osmium\\Services\\Blog\\Models\\BlogOwners::pages"
+        ],
+        "mcp.tools": [
+            "Osmium\\Services\\Blog\\Models\\BlogMcp::tools"
         ]
     },
     "admin": {
