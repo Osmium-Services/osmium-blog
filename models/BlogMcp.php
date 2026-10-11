@@ -50,6 +50,7 @@ class BlogMcp
                 'description' => 'Move a blog post to the bin (a soft delete: its page goes to the Pages bin, nothing is lost). Undo with blog_post_restore.',
                 'inputSchema' => $idAndTitle,
                 'write' => true,
+                'destructive' => true,
                 'handler' => self::class . '::delete',
             ],
             [
