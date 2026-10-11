@@ -10,14 +10,18 @@ use Osmium\Modules\Admin\Models\Page;
 use Osmium\Modules\Admin\Services\AdminPages;
 
 /**
- * The Blog's tools for the /mcp endpoint, offered through core's `mcp.tools` hook: list posts, and soft delete
- * or restore one. Delete and restore reuse BlogBin, so they behave exactly like the admin screen. There is no
- * permanent delete. Nothing here returns author names or other personal data.
+ * The Blog's tools for the /mcp endpoint, offered through core's `mcp.tools` hook: list posts, soft delete or
+ * restore one, and create a draft. Delete and restore reuse BlogBin, so they behave exactly like the admin screen.
+ * A new post is always a draft (noindex, no published date) built by BlogDraft from plain text, and someone
+ * publishes it in the admin. There is no editing, no publishing and no permanent delete. Nothing here returns
+ * author names or other personal data.
  */
 class BlogMcp
 {
     private const LIST_LIMIT = 50;
     private const RECORD_TYPE = 'blog_post';
+    private const MAX_TITLE_LENGTH = 200;
+    private const MAX_BODY_LENGTH = 50000;
 
     /**
      * @param array<string, mixed> $payload
@@ -47,6 +51,23 @@ class BlogMcp
                 'inputSchema' => $idAndTitle,
                 'write' => true,
                 'handler' => self::class . '::delete',
+            ],
+            [
+                'name' => 'blog_post_create_draft',
+                'description' => 'Create a new blog post as a draft. It is hidden from the public blog and the sitemap until someone publishes it in the admin. The body is plain text: a blank line starts a new paragraph, and any HTML typed in is shown as text. Fails if the address is already used.',
+                'inputSchema' => [
+                    'type' => 'object',
+                    'properties' => [
+                        'title' => ['type' => 'string', 'description' => 'The post title, up to ' . self::MAX_TITLE_LENGTH . ' characters'],
+                        'body' => ['type' => 'string', 'description' => 'The post as plain text, up to ' . \number_format(self::MAX_BODY_LENGTH) . ' characters'],
+                        'slug' => ['type' => 'string', 'description' => 'Optional address ending, such as my-post. Made from the title when left out'],
+                        'excerpt' => ['type' => 'string', 'description' => 'Optional short summary shown on the blog index'],
+                        'description' => ['type' => 'string', 'description' => 'Optional meta description for search results, up to 320 characters'],
+                    ],
+                    'required' => ['title', 'body'],
+                ],
+                'write' => true,
+                'handler' => self::class . '::createDraft',
             ],
             [
                 'name' => 'blog_post_restore',
@@ -115,6 +136,43 @@ class BlogMcp
      * @param array<string, mixed> $call
      * @return array<string, mixed>
      */
+    public static function createDraft(array $call): array
+    {
+        $arguments = $call['arguments'] ?? [];
+        $title = \trim((string) ($arguments['title'] ?? ''));
+        $body = \trim((string) ($arguments['body'] ?? ''));
+        $description = \trim((string) ($arguments['description'] ?? ''));
+
+        if ($title === '' || $body === '') throw new McpToolException('Give the post a title and a body.');
+        if (\mb_strlen($title) > self::MAX_TITLE_LENGTH) throw new McpToolException('A title can be up to ' . self::MAX_TITLE_LENGTH . ' characters.');
+        if (\mb_strlen($body) > self::MAX_BODY_LENGTH) throw new McpToolException('A body can be up to ' . \number_format(self::MAX_BODY_LENGTH) . ' characters.');
+        if (\mb_strlen($description) > 320) throw new McpToolException('A description can be up to 320 characters.');
+
+        $posts = new BlogPost($call['dataSource']);
+
+        try {
+            $draft = self::draft($call, $posts)->create(
+                title: $title,
+                body: $body,
+                slug: \trim((string) ($arguments['slug'] ?? '')),
+                excerpt: (string) ($arguments['excerpt'] ?? ''),
+                description: $description,
+            );
+        } catch (\Exception $e) {
+            throw new McpToolException($e->getMessage());
+        }
+
+        return $draft + [
+            'created' => true,
+            'status' => 'draft',
+            'next_step' => 'Open the post in the admin (Blog) to check it and tick Published, or leave it as a draft. Undo with blog_post_delete.',
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $call
+     * @return array<string, mixed>
+     */
     public static function restore(array $call): array
     {
         [$id, $expectedTitle] = self::idAndTitle($call['arguments'] ?? []);
@@ -161,21 +219,37 @@ class BlogMcp
     /** @param array<string, mixed> $call */
     private static function bin(array $call, BlogPost $posts): BlogBin
     {
-        $dataSource = $call['dataSource'];
-        $osmium = $call['osmium'];
-        $changelog = new Changelog($dataSource, 'changelog');
+        return new BlogBin($posts, self::pages($call), self::logger($call));
+    }
+
+    /** @param array<string, mixed> $call */
+    private static function draft(array $call, BlogPost $posts): BlogDraft
+    {
+        return new BlogDraft($posts, self::pages($call), self::logger($call));
+    }
+
+    /** @param array<string, mixed> $call */
+    private static function pages(array $call): AdminPages
+    {
+        return new AdminPages(
+            page: new Page($call['dataSource'], 'pages'),
+            urlTrailingSlash: $call['osmium']->config->site->urlTrailingSlash ?? false,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $call
+     * @return \Closure(string, int, string): void
+     */
+    private static function logger(array $call): \Closure
+    {
+        $changelog = new Changelog($call['dataSource'], 'changelog');
         $changelog->setGetUser(fn(): array => ['username' => $call['actor']]);
 
-        $pages = new AdminPages(
-            page: new Page($dataSource, 'pages'),
-            urlTrailingSlash: $osmium->config->site->urlTrailingSlash ?? false,
-        );
-        $log = fn(string $action, int $id, string $title) => $changelog->log(
+        return fn(string $action, int $id, string $title) => $changelog->log(
             description: $action . ': ' . $title,
             recordType: self::RECORD_TYPE,
             recordId: $id,
         );
-
-        return new BlogBin($posts, $pages, $log);
     }
 }

@@ -7,7 +7,7 @@ namespace Osmium\Services\Blog\Controllers;
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Modules\Admin\Services\AdminPages;
 use Osmium\Services\Blog\Models\BlogBin;
-use Osmium\Services\Blog\Models\BlogClaim;
+use Osmium\Services\Blog\Models\BlogDraft;
 use Osmium\Services\Blog\Models\BlogImages;
 use Osmium\Services\Blog\Models\BlogPost;
 use Osmium\Services\Blog\Models\BlogSettings;
@@ -248,10 +248,7 @@ class BlogController extends AdminController
 
     private function cleanSlug(string $text): string
     {
-        $slug = \strtolower(\trim($text));
-        $slug = \preg_replace('/[^a-z0-9]+/', '-', $slug) ?? '';
-
-        return \trim($slug, '-');
+        return BlogDraft::cleanSlug($text);
     }
 
     private function pages(): AdminPages
@@ -267,23 +264,14 @@ class BlogController extends AdminController
         return new BlogBin(new BlogPost($this->osmium->dataSource), $this->pages(), $this->logChange(...));
     }
 
-    /**
-     * The blog index page (/blog), created the first time a post is saved so posts have breadcrumbs
-     * to lead back to and the index has an address of its own
-     */
     private function blogIndexPageId(): ?int
     {
-        foreach (\Osmium\Core\Models\Model::pagesById() as $page) {
-            $isBlogIndex = ($page['url'] ?? '') === BlogClaim::INDEX_SLUG && ($page['deleted_at'] ?? null) === null;
-            if ($isBlogIndex) return (int) $page['id'];
-        }
+        return $this->draft()->indexPageId();
+    }
 
-        return $this->pages()->create([
-            'url' => BlogClaim::INDEX_SLUG,
-            'title' => 'Blog',
-            'description' => '',
-            'robots' => 'index,follow',
-        ]);
+    private function draft(): BlogDraft
+    {
+        return new BlogDraft(new BlogPost($this->osmium->dataSource), $this->pages(), $this->logChange(...));
     }
 
     private function formatPost(array $post): array
