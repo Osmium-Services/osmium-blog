@@ -136,7 +136,12 @@ class BlogController extends AdminController
 
         if ($id === 0) {
             $pageId = $pages->create($pageFields);
-            $id = $model->create($pageId, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+            try {
+                $id = $model->create($pageId, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+            } catch (\Throwable $e) {
+                $pages->permanentDelete($pageId); // No post to show for it: free the address instead of leaving an orphan page
+                throw $e;
+            }
             $this->logChange(action: 'Created', id: $id, name: $title);
 
             return ['success' => true, 'id' => $id];

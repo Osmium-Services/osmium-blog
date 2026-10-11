@@ -50,7 +50,12 @@ class BlogDraft
         }
 
         $excerpt = \trim($excerpt) ?: null;
-        $id = $this->posts->create($pageId, $excerpt, BlogText::paragraphs($body), null, null, null, false, null);
+        try {
+            $id = $this->posts->create($pageId, $excerpt, BlogText::paragraphs($body), null, null, null, false, null);
+        } catch (\Throwable $e) {
+            $this->pages->permanentDelete($pageId); // No post to show for it: free the address instead of leaving an orphan page
+            throw $e;
+        }
         ($this->log)('Created', $id, $title);
 
         return ['id' => $id, 'title' => $title, 'address' => '/' . self::URL_PREFIX . $slug];
