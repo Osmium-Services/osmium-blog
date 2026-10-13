@@ -31,7 +31,7 @@ class BlogController extends AdminController
 
     public function index(): void
     {
-        require_once 'app/modules/admin/core/ListView.php';
+        require_once 'app/admin/core/ListView.php';
 
         $posts = (new BlogPost($this->osmium->dataSource))->listAll();
 
