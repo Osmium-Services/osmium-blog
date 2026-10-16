@@ -8,6 +8,7 @@ use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Modules\Admin\Services\AdminPages;
 use Osmium\Services\Blog\Models\BlogBin;
 use Osmium\Services\Blog\Models\BlogDraft;
+use Osmium\Services\Blog\Models\BlogHtml;
 use Osmium\Services\Blog\Models\BlogImages;
 use Osmium\Services\Blog\Models\BlogPost;
 use Osmium\Services\Blog\Models\BlogSettings;
@@ -115,7 +116,7 @@ class BlogController extends AdminController
         $slug = $this->cleanSlug((string) ($input['slug'] ?? '') ?: $title);
         if ($slug === '') throw new \InvalidArgumentException('Slug is required');
 
-        $body = (string) ($input['body'] ?? '');
+        $body = BlogHtml::sanitize((string) ($input['body'] ?? '')); // The editor's DOMPurify is only a courtesy
         $heroImage = $this->ownImage((string) ($input['hero_image'] ?? ''));
         $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''));
         $isPublished = !empty($input['is_published']);
