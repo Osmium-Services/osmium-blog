@@ -1,6 +1,7 @@
 <?php
 
 use Osmium\Modules\Admin\Core\ListView;
+use Osmium\Services\Blog\Models\BlogText;
 
 require_once 'app/admin/core/ListView.php';
 
@@ -60,8 +61,8 @@ $listContext = [
 
 <script nonce="<?= $cspNonce ?? '' ?>">
     window.BlogList = {
-        endpoint: <?= \json_encode($adminUrl('blog/action/')) ?>,
-        posts: <?= \json_encode(\array_column(
+        endpoint: <?= BlogText::scriptJson($adminUrl('blog/action/')) ?>,
+        posts: <?= BlogText::scriptJson(\array_column(
             \array_map(fn($p) => ['id' => (int) $p['id'], 'title' => $p['title'], 'url' => $p['url_path']], $admin['posts']),
             null,
             'id',

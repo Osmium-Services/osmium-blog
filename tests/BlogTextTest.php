@@ -63,4 +63,14 @@ final class BlogTextTest extends TestCase
         $this->assertSame('x', BlogDraft::cleanSlug('../x/..'));
         $this->assertSame('a-script-b', BlogDraft::cleanSlug('a<script>b'));
     }
+
+    public function test_script_json_cannot_close_a_script_tag_or_break_out_of_a_quote(): void
+    {
+        $json = BlogText::scriptJson(['title' => '</script><img src=x onerror=alert(1)> & "q" \'s']);
+
+        foreach (['<', '>', '&', "'"] as $char) {
+            $this->assertStringNotContainsString($char, $json, $char);
+        }
+        $this->assertSame('</script><img src=x onerror=alert(1)> & "q" \'s', \json_decode($json, true)['title'], 'it still decodes to the original');
+    }
 }
