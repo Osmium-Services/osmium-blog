@@ -32,6 +32,7 @@ class BlogController extends AdminController
 
     public function index(): void
     {
+        require_once 'app/admin/core/ListView.php';
 
         $posts = (new BlogPost($this->osmium->dataSource))->listAll();
 
@@ -116,8 +117,6 @@ class BlogController extends AdminController
         if ($slug === '') throw new \InvalidArgumentException('Slug is required');
 
         $body = BlogHtml::sanitize((string) ($input['body'] ?? '')); // The editor's DOMPurify is only a courtesy
-        $heroImage = $this->ownImage((string) ($input['hero_image'] ?? ''));
-        $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''));
         $isPublished = !empty($input['is_published']);
         $excerpt = \trim((string) ($input['excerpt'] ?? '')) ?: null;
         $authorUserId = (int) ($input['author_user_id'] ?? 0) ?: null;
@@ -125,6 +124,11 @@ class BlogController extends AdminController
 
         $pages = $this->pages();
         $model = new BlogPost($this->osmium->dataSource);
+        $existing = $id === 0 ? null : $model->getById($id);
+        if ($id !== 0 && !$existing) throw new \InvalidArgumentException('Post not found');
+
+        $heroImage = $this->ownImage((string) ($input['hero_image'] ?? ''), $existing['hero_image'] ?? null);
+        $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''), $existing['social_image'] ?? null);
 
         $pageFields = [
             'url' => self::URL_PREFIX . $slug,
@@ -146,9 +150,6 @@ class BlogController extends AdminController
 
             return ['success' => true, 'id' => $id];
         }
-
-        $existing = $model->getById($id);
-        if (!$existing) throw new \InvalidArgumentException('Post not found');
 
         $pages->update((int) $existing['page_id'], $pageFields); // Redirects the old url when the slug changed
         $model->update($id, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
@@ -189,10 +190,13 @@ class BlogController extends AdminController
     }
 
     /**
-     * A hero or social image path is kept only when it is one this service stored
+     * A hero or social image path is kept only when it is one this service stored, or is the path the post already has
+     * (so saving an imported post doesn't clear its images)
      */
-    private function ownImage(string $path): ?string
+    private function ownImage(string $path, ?string $current = null): ?string
     {
+        if ($path !== '' && $path === $current) return $path;
+
         return BlogImages::isBlogImage($path) ? $path : null;
     }
 
