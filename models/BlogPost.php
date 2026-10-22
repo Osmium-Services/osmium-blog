@@ -52,6 +52,16 @@ class BlogPost extends Model
     }
 
     /**
+     * Posts created or changed in the last 24 hours, newest change first, capped at 10
+     */
+    public function listRecent(): array
+    {
+        $this->database->query($this->loadSqlFile('blog-post-list-recent.sql'));
+
+        return $this->database->resultset();
+    }
+
+    /**
      * Every post whose page is in the bin, with its page's url and title, most recently deleted first
      */
     public function listDeleted(): array

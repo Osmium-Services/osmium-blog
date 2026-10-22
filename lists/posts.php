@@ -8,6 +8,32 @@ use Osmium\Modules\Admin\Core\ListView;
  * Blog posts list, rendered by Osmium\Modules\Admin\Core\ListView. Rows are shaped by BlogController::formatPost().
  */
 return [
+    'recent' => [
+        'id' => 'blog-posts-recent',
+        'title' => 'Recent Changes',
+        'noun' => ['post', 'posts'],
+        'icon' => 'bx-time-five',
+        'endpoint' => 'blog/action/',
+        'datatable' => false,
+        'collapsible' => ['label' => 'Recent Changes ({count})'],
+        'hideWhenEmpty' => false,
+        'columns' => [
+            ['key' => 'title', 'label' => 'Post', 'type' => 'text', 'strong' => true, 'fallback' => 'Untitled', 'fill' => true],
+            [
+                'key' => 'status_label',
+                'label' => 'Status',
+                'type' => 'badge',
+                'text' => true,
+                'classKey' => 'status_class',
+                'classPrefix' => 'bg-label-',
+            ],
+            ['key' => 'updated_label', 'label' => 'Updated', 'type' => 'text', 'small' => true, 'nowrap' => true],
+        ],
+        'actions' => [
+            ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'url' => '{edit_url}'],
+        ],
+    ],
+
     'posts' => [
         'id' => 'blog-posts',
         'title' => 'Posts',
@@ -54,6 +80,7 @@ return [
             'title' => 'Deleted Posts',
             'noun' => ['post', 'posts'],
             'endpoint' => 'blog/action/',
+            'hideWhenEmpty' => false,
             'columns' => [
                 [
                     'key' => 'title',

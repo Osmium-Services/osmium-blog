@@ -36,6 +36,7 @@ class BlogController extends AdminController
 
         $this->data['admin']['isAdmin'] = $this->isAdmin();
         $this->data['admin']['posts'] = \array_map($this->formatPost(...), $posts);
+        $this->data['admin']['recentPosts'] = \array_map($this->formatRecentPost(...), (new BlogPost($this->osmium->dataSource))->listRecent());
         $this->data['admin']['deletedPosts'] = \array_map($this->formatPost(...), (new BlogPost($this->osmium->dataSource))->listDeleted());
         $this->data['admin']['redirectTargets'] = $this->linkTargets();
         $this->data['admin']['lists'] = require __DIR__ . '/../lists/posts.php';
@@ -297,6 +298,13 @@ class BlogController extends AdminController
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',
             'date_sort' => (string) $date,
         ];
+    }
+
+    private function formatRecentPost(array $post): array
+    {
+        $changed = $post['updated_at'] ?? $post['created_at'];
+
+        return $this->formatPost($post) + ['updated_label' => \date('j M Y, g:ia', \strtotime((string) $changed))];
     }
 
     private function isPost(): bool
