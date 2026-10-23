@@ -44,7 +44,7 @@
                 },
                 {
                     "id": "settings",
-                    "label": "Blog",
+                    "label": "Osmium Blog",
                     "icon": "bx bx-news",
                     "route": "admin/settings/blog",
                     "activePattern": "admin/settings/blog",

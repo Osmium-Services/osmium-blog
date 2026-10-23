@@ -26,7 +26,7 @@ class SettingsController extends AdminController
         $this->data['admin']['settingsError'] = $_SESSION['blog_settings_error'] ?? false;
         unset($_SESSION['blog_settings_saved'], $_SESSION['blog_settings_error']);
 
-        $this->setView('settings/index.phtml');
+        $this->setView('blog/settings.phtml');
     }
 
     private function handleSubmit(): void

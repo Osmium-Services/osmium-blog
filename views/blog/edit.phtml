@@ -1,7 +1,7 @@
 <?php $post = $admin['post']; ?>
 <div class="d-flex justify-content-between align-items-center py-3 mb-4">
     <h4 class="mb-0">
-        <span class="text-muted fw-light">Content / Blog /</span> <?= $post['id'] ? 'Edit Post' : 'New Post' ?>
+        <span class="text-muted fw-light"><a href="<?= $adminUrl('blog/') ?>">Blog</a> /</span> <?= $post['id'] ? 'Edit Post' : 'New Post' ?>
     </h4>
     <a href="<?= $adminUrl('blog/') ?>" class="btn btn-label-secondary">
         <i class="bx bx-arrow-back me-1"></i> All posts
