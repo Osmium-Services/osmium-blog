@@ -68,8 +68,17 @@ class BlogController extends AdminController
             'publishedAt' => isset($post['published_at']) ? \date('Y-m-d\TH:i', \strtotime($post['published_at'])) : '',
         ];
         $this->data['admin']['authors'] = $model->authors();
+        $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
 
         $this->setView('blog/edit.phtml');
+    }
+
+    private function consumeSavedFlag(): bool
+    {
+        $wasSaved = isset($_SESSION['blog_saved']);
+        unset($_SESSION['blog_saved']);
+
+        return $wasSaved;
     }
 
     public function action()
@@ -146,6 +155,7 @@ class BlogController extends AdminController
                 throw $e;
             }
             $this->logChange(action: 'Created', id: $id, name: $title);
+            $_SESSION['blog_saved'] = true;
 
             return ['success' => true, 'id' => $id];
         }
@@ -153,6 +163,7 @@ class BlogController extends AdminController
         $pages->update((int) $existing['page_id'], $pageFields); // Redirects the old url when the slug changed
         $model->update($id, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
         $this->logChange(action: 'Updated', id: $id, name: $title);
+        $_SESSION['blog_saved'] = true;
 
         return ['success' => true, 'id' => $id];
     }
@@ -302,7 +313,7 @@ class BlogController extends AdminController
 
     private function formatRecentPost(array $post): array
     {
-        $changed = $post['updated_at'] ?? $post['created_at'];
+        $changed = \max($post['updated_at'] ?? '', $post['deleted_at'] ?? '', $post['created_at']);
 
         return $this->formatPost($post) + ['updated_label' => \date('j M Y, g:ia', \strtotime((string) $changed))];
     }

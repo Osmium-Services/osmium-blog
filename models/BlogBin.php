@@ -35,6 +35,7 @@ class BlogBin
         if (!$isSitePath) throw new \InvalidArgumentException('Redirect to a page of this site, starting with /');
 
         $this->pages->delete(id: (int) $post['page_id'], input: ['redirect_target' => $redirectTarget]);
+        $this->posts->touch($id);
         ($this->log)('Deleted', $id, (string) $post['title']);
 
         return $post;
@@ -47,6 +48,7 @@ class BlogBin
         if (!$post) throw new \InvalidArgumentException('Deleted post not found');
 
         $this->pages->restore((int) $post['page_id']);
+        $this->posts->touch($id);
         ($this->log)('Restored', $id, (string) $post['title']);
 
         return $post;

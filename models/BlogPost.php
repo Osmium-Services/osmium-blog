@@ -120,6 +120,14 @@ class BlogPost extends Model
         $this->database->execute();
     }
 
+    /** Marks the post as just changed, for bin and restore, which only touch its page. */
+    public function touch(int $id): void
+    {
+        $this->database->query($this->loadSqlFile('blog-post-touch.sql'));
+        $this->database->bind(param: ':id', value: $id);
+        $this->database->execute();
+    }
+
     public function delete(int $id): void
     {
         $this->database->query($this->loadSqlFile('blog-post-delete.sql'));

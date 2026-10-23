@@ -8,6 +8,14 @@
     </a>
 </div>
 
+<?php if ($admin['showSavedMessage']): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bx bx-check-circle me-1"></i>
+        Post saved successfully.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
 <div id="blogResult" class="alert d-none"></div>
 
 <form id="blogForm" autocomplete="off">

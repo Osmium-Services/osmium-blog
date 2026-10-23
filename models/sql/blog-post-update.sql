@@ -5,5 +5,6 @@ SET excerpt = :excerpt,
     social_image = :social_image,
     author_user_id = :author_user_id,
     is_published = :is_published,
-    published_at = :published_at
+    published_at = :published_at,
+    updated_at = NOW()
 WHERE id = :id

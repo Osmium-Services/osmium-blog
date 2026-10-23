@@ -354,12 +354,8 @@
                 return;
             }
 
-            const isNew = !payload.id;
-            if (isNew) {
-                window.location.href = config.editUrl + '?id=' + data.id;
-                return;
-            }
-            showResult('Saved.', 'success');
+            // Go to the post by id: the page shows the same saved bar as every other edit screen
+            window.location.href = config.editUrl + '?id=' + data.id;
         } catch (error) {
             showResult('Could not save the post.', 'danger');
         }
