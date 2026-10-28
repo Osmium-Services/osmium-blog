@@ -17,7 +17,6 @@ return [
         'icon' => 'bx-time-five',
         'rowClass' => static fn(array $row): string => empty($row['deleted_at']) ? '' : 'table-danger',
         'endpoint' => 'blog/action/',
-        'datatable' => false,
         'collapsible' => ['label' => 'Recent Changes ({count})'],
         'hideWhenEmpty' => false,
         'columns' => [
