@@ -1,7 +1,7 @@
 {
     "id": "osmium-blog",
     "name": "Osmium Blog",
-    "version": "0.10.3",
+    "version": "0.10.4",
     "description": "Blog posts written in admin and published as ordinary pages under /blog/, with the markup supplied by the theme",
     "category": "content",
     "author": {
@@ -34,7 +34,7 @@
             "items": [
                 {
                     "id": "blog",
-                    "label": "Blog",
+                    "label": "Osmium Blog",
                     "icon": "bx bx-news",
                     "color": "#000000",
                     "placement": "top",
@@ -57,7 +57,7 @@
                 "controller": "controllers/BlogController.php",
                 "class": "Osmium\\Services\\Blog\\Controllers\\BlogController",
                 "method": "index",
-                "title": "Blog"
+                "title": "Osmium Blog"
             },
             "admin/blog/edit": {
                 "controller": "controllers/BlogController.php",
