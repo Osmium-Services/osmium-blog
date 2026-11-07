@@ -41,6 +41,7 @@ return [
         'endpoint' => 'blog/action/',
         'emptyText' => 'No posts yet. Use New Post to write the first.',
         'order' => null, // keep the server's newest-first order until a header is clicked
+        'grid' => require __DIR__ . '/../grids/posts.php',
         'columns' => [
             [
                 'key' => 'title',
@@ -51,7 +52,7 @@ return [
                 'fill' => true,
                 'sub' => ['key' => 'url_path', 'style' => 'link', 'href' => '{url_path}'],
             ],
-            ['key' => 'author_name', 'label' => 'Author', 'type' => 'text', 'nowrap' => true, 'fallback' => '-'],
+            ['key' => 'author_name', 'label' => 'Author', 'type' => 'text', 'nowrap' => true, 'fallback' => '-', 'hideBelow' => 'md'],
             [
                 'key' => 'status_label',
                 'label' => 'Status',
@@ -60,7 +61,7 @@ return [
                 'classKey' => 'status_class',
                 'classPrefix' => 'bg-label-',
             ],
-            ['key' => 'date_label', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'date_sort'],
+            ['key' => 'date_label', 'label' => 'Date', 'type' => 'text', 'nowrap' => true, 'sortKey' => 'date_sort', 'hideBelow' => 'md'],
         ],
         'actions' => [
             ['label' => 'Edit', 'icon' => 'bx-edit-alt', 'url' => '{edit_url}'],

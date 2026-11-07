@@ -4,6 +4,7 @@ SELECT
     p.author_user_id,
     p.is_published,
     p.published_at,
+    p.hero_image,
     p.updated_at,
     pg.url,
     pg.title,
