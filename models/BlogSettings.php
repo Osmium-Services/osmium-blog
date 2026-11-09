@@ -7,8 +7,8 @@ namespace Osmium\Services\Blog\Models;
 /**
  * This service's settings, read from app/config/services/osmium-blog.json.php (the file-based convention the
  * other services use). Missing file means the defaults: a new post is credited to whoever is writing it, and
- * the posts live under /blog. `indexSlug` moves them under another section (for example `guides`); it is set by
- * editing that file, not in admin, because changing it once posts exist would strand their addresses.
+ * the posts live under /blog. `indexSlug` moves them under another section (for example `guides`); the admin
+ * settings screen only lets it change while there are no posts, because changing it afterwards would strand their addresses.
  */
 class BlogSettings
 {
@@ -41,13 +41,14 @@ class BlogSettings
 
     /**
      * @param int $defaultAuthorId User credited on a new post; 0 means the signed-in user
+     * @param string|null $indexSlug The section the blog lives under; null keeps the current one
      */
-    public static function save(int $defaultAuthorId): void
+    public static function save(int $defaultAuthorId, ?string $indexSlug = null): void
     {
         $dir = \dirname(self::CONFIG_PATH);
         if (!\is_dir($dir)) \mkdir(directory: $dir, permissions: 0755, recursive: true);
 
-        $data = ['blog' => ['defaultAuthorId' => \max(0, $defaultAuthorId), 'indexSlug' => self::indexSlug()]];
+        $data = ['blog' => ['defaultAuthorId' => \max(0, $defaultAuthorId), 'indexSlug' => $indexSlug ?? self::indexSlug()]];
 
         $json = \json_encode(value: $data, flags: JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         \file_put_contents(self::CONFIG_PATH, "<?php exit(); ?>\n" . $json . "\n");

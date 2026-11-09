@@ -6,6 +6,7 @@ namespace Osmium\Services\Blog\Controllers;
 
 use Osmium\Modules\Admin\Core\AdminController;
 use Osmium\Services\Blog\Models\BlogPost;
+use Osmium\Services\Blog\Models\BlogDraft;
 use Osmium\Services\Blog\Models\BlogSettings;
 
 /**
@@ -22,11 +23,17 @@ class SettingsController extends AdminController
 
         $this->data['admin']['settings'] = BlogSettings::get();
         $this->data['admin']['authors'] = (new BlogPost($this->osmium->dataSource))->authors();
+        $this->data['admin']['hasPosts'] = $this->hasPosts();
         $this->data['admin']['settingsSaved'] = $_SESSION['blog_settings_saved'] ?? false;
         $this->data['admin']['settingsError'] = $_SESSION['blog_settings_error'] ?? false;
         unset($_SESSION['blog_settings_saved'], $_SESSION['blog_settings_error']);
 
         $this->setView('blog/settings.phtml');
+    }
+
+    private function hasPosts(): bool
+    {
+        return (new BlogPost($this->osmium->dataSource))->listAll() !== [];
     }
 
     private function handleSubmit(): void
@@ -40,7 +47,14 @@ class SettingsController extends AdminController
         $knownIds = \array_map('intval', \array_column((new BlogPost($this->osmium->dataSource))->authors(), 'id'));
         if (!\in_array($authorId, $knownIds, true)) $authorId = 0;
 
-        BlogSettings::save(defaultAuthorId: $authorId);
+        // The section can only move while no post exists: every post's address starts with it
+        $indexSlug = null;
+        if (!$this->hasPosts()) {
+            $indexSlug = BlogDraft::cleanSlug((string) ($_POST['index_slug'] ?? ''));
+            if ($indexSlug === '') $indexSlug = BlogSettings::DEFAULT_INDEX_SLUG;
+        }
+
+        BlogSettings::save(defaultAuthorId: $authorId, indexSlug: $indexSlug);
 
         $this->admin->model->changelog->log(
             description: 'Updated Blog settings',

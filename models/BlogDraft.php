@@ -80,7 +80,7 @@ class BlogDraft
 
         return $this->pages->create([
             'url' => BlogSettings::indexSlug(),
-            'title' => 'Blog',
+            'title' => \ucwords(\str_replace('-', ' ', BlogSettings::indexSlug())),
             'description' => '',
             'robots' => 'index,follow',
         ]);
