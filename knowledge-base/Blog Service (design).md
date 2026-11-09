@@ -1,6 +1,6 @@
 # Blog Service (design)
 
-Status (updated 2026-10-10): **published**. Repo `Osmium-Services/osmium-blog`, now v0.8.3<!--v:osmium-blog-->, in the Store, service id
+Status (updated 2026-10-10): **published**. Repo `Osmium-Services/osmium-blog`, now v0.10.9<!--v:osmium-blog-->, in the Store, service id
 `osmium-blog`, category content. The `page.claim` hook is in core and documented on [[Hooks Reference]]. The text below is
 the original design and the 2026-10-07 build notes, kept as written. Drafts are noindex, there is no scheduling, SolarGo2
 cannot be the test theme (it runs an older Osmium), and uninstalling leaves the data.
