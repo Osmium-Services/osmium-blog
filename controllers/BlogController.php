@@ -57,6 +57,7 @@ class BlogController extends AdminController
             'id' => $id,
             'title' => $post['title'] ?? '',
             'slug' => $slug,
+            'addressPrefix' => '/' . BlogSettings::indexSlug() . '/',
             'description' => $post['description'] ?? '',
             'excerpt' => $post['excerpt'] ?? '',
             'heroImage' => $post['hero_image'] ?? '',

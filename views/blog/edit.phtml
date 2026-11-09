@@ -95,7 +95,7 @@
                     <div class="mb-3">
                         <label for="blogSlug" class="form-label">Address</label>
                         <div class="input-group">
-                            <span class="input-group-text">/blog/</span>
+                            <span class="input-group-text"><?= \htmlspecialchars($post['addressPrefix']) ?></span>
                             <input type="text" class="form-control" id="blogSlug" maxlength="120"
                                 value="<?= \htmlspecialchars($post['slug']) ?>">
                         </div>
