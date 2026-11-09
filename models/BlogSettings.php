@@ -8,7 +8,7 @@ namespace Osmium\Services\Blog\Models;
  * This service's settings, read from app/config/services/osmium-blog.json.php (the file-based convention the
  * other services use). Missing file means the defaults: a new post is credited to whoever is writing it, and
  * the posts live under /blog. `indexSlug` moves them under another section (for example `guides`). It is editable in
- * the admin settings screen, which warns when posts exist: their stored addresses do not move with it.
+ * the admin settings screen.
  */
 class BlogSettings
 {

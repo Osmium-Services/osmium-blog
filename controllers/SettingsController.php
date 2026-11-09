@@ -23,7 +23,6 @@ class SettingsController extends AdminController
 
         $this->data['admin']['settings'] = BlogSettings::get();
         $this->data['admin']['authors'] = (new BlogPost($this->osmium->dataSource))->authors();
-        $this->data['admin']['postCount'] = \count((new BlogPost($this->osmium->dataSource))->listAll());
         $this->data['admin']['settingsSaved'] = $_SESSION['blog_settings_saved'] ?? false;
         $this->data['admin']['settingsError'] = $_SESSION['blog_settings_error'] ?? false;
         unset($_SESSION['blog_settings_saved'], $_SESSION['blog_settings_error']);

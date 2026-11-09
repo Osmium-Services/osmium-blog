@@ -43,13 +43,6 @@
                             might use <code>guides</code>).
                             The theme needs matching <code>&lt;section&gt;/views/index.phtml</code> and <code>post.phtml</code> views.
                         </div>
-                        <?php if ($admin['postCount'] > 0): ?>
-                            <div class="alert alert-warning mt-3 mb-0">
-                                <?= (int) $admin['postCount'] ?> post<?= $admin['postCount'] === 1 ? '' : 's' ?> already exist. Their addresses are stored with the
-                                section they were created under and do not move when you change this, so set it to match them
-                                (check the Address of any post in the list).
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
