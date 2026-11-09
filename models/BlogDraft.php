@@ -14,8 +14,6 @@ use Osmium\Modules\Admin\Services\AdminPages;
  */
 class BlogDraft
 {
-    private const URL_PREFIX = 'blog/';
-
     /** @param \Closure(string, int, string): void $log called with the action ('Created'), post id and post title */
     public function __construct(
         private BlogPost $posts,
@@ -39,7 +37,7 @@ class BlogDraft
 
         try {
             $pageId = $this->pages->create([
-                'url' => self::URL_PREFIX . $slug,
+                'url' => BlogSettings::indexSlug() . '/' . $slug,
                 'title' => $title,
                 'description' => \trim($description),
                 'robots' => 'noindex,nofollow',
@@ -58,7 +56,7 @@ class BlogDraft
         }
         ($this->log)('Created', $id, $title);
 
-        return ['id' => $id, 'title' => $title, 'address' => '/' . self::URL_PREFIX . $slug];
+        return ['id' => $id, 'title' => $title, 'address' => '/' . BlogSettings::indexSlug() . '/' . $slug];
     }
 
     public static function cleanSlug(string $text): string
@@ -70,18 +68,18 @@ class BlogDraft
     }
 
     /**
-     * The blog index page (/blog), created the first time a post is saved so posts have breadcrumbs
+     * The blog index page (/blog by default), created the first time a post is saved so posts have breadcrumbs
      * to lead back to and the index has an address of its own
      */
     public function indexPageId(): ?int
     {
         foreach (Model::pagesById() as $page) {
-            $isBlogIndex = ($page['url'] ?? '') === BlogClaim::INDEX_SLUG && ($page['deleted_at'] ?? null) === null;
+            $isBlogIndex = ($page['url'] ?? '') === BlogSettings::indexSlug() && ($page['deleted_at'] ?? null) === null;
             if ($isBlogIndex) return (int) $page['id'];
         }
 
         return $this->pages->create([
-            'url' => BlogClaim::INDEX_SLUG,
+            'url' => BlogSettings::indexSlug(),
             'title' => 'Blog',
             'description' => '',
             'robots' => 'index,follow',

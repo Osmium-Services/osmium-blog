@@ -23,7 +23,7 @@ class BlogOwners
             $owned[(int) $row['page_id']] = ['label' => 'Blog', 'editUrl' => 'blog/edit/?id=' . (int) $row['id']];
         }
 
-        $indexPageId = $posts->indexPageId(BlogClaim::INDEX_SLUG);
+        $indexPageId = $posts->indexPageId(BlogSettings::indexSlug());
         if ($indexPageId !== null) $owned[$indexPageId] = ['label' => 'Blog', 'editUrl' => 'blog/'];
 
         return $owned;

@@ -28,7 +28,6 @@ use Osmium\Services\Blog\Models\BlogSettings;
 class BlogController extends AdminController
 {
     private const RECORD_TYPE = 'blog_post';
-    private const URL_PREFIX = 'blog/';
 
     public function index(): void
     {
@@ -53,7 +52,7 @@ class BlogController extends AdminController
         $post = $id ? $model->getById($id) : null;
         if ($id && !$post) $this->redirect('blog/');
 
-        $slug = $post ? \substr($post['url'], \strlen(self::URL_PREFIX)) : '';
+        $slug = $post ? \substr($post['url'], \strlen(BlogSettings::indexSlug() . '/')) : '';
         $this->data['admin']['post'] = [
             'id' => $id,
             'title' => $post['title'] ?? '',
@@ -139,7 +138,7 @@ class BlogController extends AdminController
         $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''), $existing['social_image'] ?? null);
 
         $pageFields = [
-            'url' => self::URL_PREFIX . $slug,
+            'url' => BlogSettings::indexSlug() . '/' . $slug,
             'title' => $title,
             'description' => \trim((string) ($input['description'] ?? '')),
             'robots' => $isPublished ? 'index,follow' : 'noindex,nofollow', // A draft stays out of the sitemap

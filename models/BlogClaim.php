@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Osmium\Services\Blog\Models;
 
 /**
- * Answers core's `page.claim` hook. Two pages are the blog's: the index (the page at /blog) and a
+ * Answers core's `page.claim` hook. Two pages are the blog's: the index (the page at /blog, or whichever section
+ * BlogSettings::indexSlug() names) and a
  * published post. Everything else returns null so another service, or the page's own module folder,
  * gets its turn. The theme supplies the views; the claim only names them and hands over the data.
  *
  * An unpublished post is shown only to a signed-in admin, with $blogIsPreview true (the theme may show a banner).
  *
- * Index view blog/views/index.phtml gets $blogIndex: posts (newest first) and total.
- * Post view blog/views/post.phtml gets $blogPost (the row), $blogAuthor and $blogPostSchema (a ready
+ * Index view <section>/views/index.phtml (blog/views/index.phtml by default) gets $blogIndex: posts (newest first) and total.
+ * Post view <section>/views/post.phtml gets $blogPost (the row), $blogAuthor and $blogPostSchema (a ready
  * <script type="application/ld+json"> tag to echo).
  */
 class BlogClaim
 {
     // One index page lists every post. Paging is not built yet.
     private const INDEX_LIMIT = 500;
-    public const INDEX_SLUG = 'blog';
 
     /**
      * @param array{pageId: int, slug: string, osmium: object, data?: array} $payload
@@ -28,7 +28,7 @@ class BlogClaim
     {
         $posts = new BlogPost($payload['osmium']->dataSource);
 
-        $isIndex = $payload['slug'] === self::INDEX_SLUG;
+        $isIndex = $payload['slug'] === BlogSettings::indexSlug();
         if ($isIndex) return self::index($posts);
 
         $post = $posts->findPublishedByPageId($payload['pageId']);
@@ -62,7 +62,7 @@ class BlogClaim
         $all = $posts->published(limit: self::INDEX_LIMIT);
 
         return [
-            'view' => 'blog/views/index.phtml',
+            'view' => BlogSettings::indexSlug() . '/views/index.phtml',
             'data' => ['blogIndex' => ['posts' => $all, 'total' => \count($all)]],
         ];
     }
@@ -78,6 +78,6 @@ class BlogClaim
         $withShareImage = \array_replace_recursive($payload['data'] ?? [], $data);
         $data['blogPostSchema'] = BlogSchema::script($post, $withShareImage);
 
-        return ['view' => 'blog/views/post.phtml', 'data' => $data];
+        return ['view' => BlogSettings::indexSlug() . '/views/post.phtml', 'data' => $data];
     }
 }
