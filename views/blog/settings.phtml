@@ -35,15 +35,21 @@
                         <div class="input-group">
                             <span class="input-group-text">/</span>
                             <input type="text" class="form-control" id="index_slug" name="index_slug" maxlength="100"
-                                value="<?= \htmlspecialchars($admin['settings']['indexSlug']) ?>" <?= $admin['hasPosts'] ? 'readonly' : '' ?>>
+                                value="<?= \htmlspecialchars($admin['settings']['indexSlug']) ?>">
                             <span class="input-group-text">/</span>
                         </div>
                         <div class="form-text">
                             The page the posts are listed on, and the start of every post's address (the default is <code>blog</code>; a site
                             might use <code>guides</code>).
-                            <?= $admin['hasPosts'] ? 'It is locked because posts already exist: changing it would break their addresses.' : 'It can only be changed while there are no posts.' ?>
                             The theme needs matching <code>&lt;section&gt;/views/index.phtml</code> and <code>post.phtml</code> views.
                         </div>
+                        <?php if ($admin['postCount'] > 0): ?>
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <?= (int) $admin['postCount'] ?> post<?= $admin['postCount'] === 1 ? '' : 's' ?> already exist. Their addresses are stored with the
+                                section they were created under and do not move when you change this, so set it to match them
+                                (check the Address of any post in the list).
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
