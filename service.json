@@ -59,6 +59,12 @@
                 "method": "index",
                 "title": "Osmium Blog"
             },
+            "admin/blog/add": {
+                "controller": "controllers/BlogController.php",
+                "class": "Osmium\\Services\\Blog\\Controllers\\BlogController",
+                "method": "add",
+                "title": "New Post"
+            },
             "admin/blog/edit": {
                 "controller": "controllers/BlogController.php",
                 "class": "Osmium\\Services\\Blog\\Controllers\\BlogController",

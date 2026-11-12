@@ -43,15 +43,28 @@ class BlogController extends AdminController
         $this->setView('blog/index.phtml');
     }
 
+    public function add(): void
+    {
+        $this->osmium->clearStashedQuerystring();
+        $this->prepareFormData(model: new BlogPost($this->osmium->dataSource), id: 0, post: null);
+        $this->setView('blog/add.phtml');
+    }
+
     public function edit(): void
     {
         $model = new BlogPost($this->osmium->dataSource);
 
         $id = (int) $this->osmium->getStashedParam(key: 'id', default: 0); // Core moves query params out of $_GET
-        $this->osmium->clearStashedQuerystring(); // Or a later "New Post" would reopen this post
+        $this->osmium->clearStashedQuerystring();
         $post = $id ? $model->getById($id) : null;
-        if ($id && !$post) $this->redirect('blog/');
+        if (!$post) $this->redirect('blog/');
 
+        $this->prepareFormData(model: $model, id: $id, post: $post);
+        $this->setView('blog/edit.phtml');
+    }
+
+    private function prepareFormData(BlogPost $model, int $id, ?array $post): void
+    {
         $slug = $post ? \substr($post['url'], \strlen(BlogSettings::indexSlug() . '/')) : '';
         $this->data['admin']['post'] = [
             'id' => $id,
@@ -69,8 +82,6 @@ class BlogController extends AdminController
         ];
         $this->data['admin']['authors'] = $model->authors();
         $this->data['admin']['showSavedMessage'] = $this->consumeSavedFlag();
-
-        $this->setView('blog/edit.phtml');
     }
 
     private function consumeSavedFlag(): bool
