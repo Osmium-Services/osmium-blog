@@ -15,9 +15,16 @@ $listContext = [
     <h4 class="mb-0">
         <img src="/assets/services/osmium-blog/logo.png" alt="" width="28" height="28" class="me-2 align-text-bottom">Osmium Blog
     </h4>
-    <a href="<?= $adminUrl('blog/add/') ?>" class="btn btn-primary">
-        <i class="bx bx-plus me-1"></i> New Post
-    </a>
+    <div>
+        <?php if ($admin['isAdmin'] ?? false): ?>
+        <a href="<?= $admin['basePath'] ?>settings/blog/" class="btn btn-outline-secondary me-2">
+            <i class="bx bx-cog me-1"></i> Settings
+        </a>
+        <?php endif; ?>
+        <a href="<?= $adminUrl('blog/add/') ?>" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> New Post
+        </a>
+    </div>
 </div>
 
 <?= ListView::render($admin['lists']['posts'], $admin['posts'], $listContext) ?>
