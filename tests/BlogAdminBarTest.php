@@ -41,6 +41,7 @@ final class BlogAdminBarTest extends TestCase
 
         $this->assertSame('blog/edit/?id=12', $links[0]['path']);
         $this->assertSame('Edit post', $links[0]['label']);
+        $this->assertSame('bx-news', $links[0]['icon']); // The blog's own icon
         $this->assertTrue($links[0]['primary']);
     }
 

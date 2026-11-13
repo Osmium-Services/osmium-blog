@@ -38,7 +38,7 @@ class BlogAdminBar
 
         $isPost = \preg_match('/^blog-post:(\d+)$/', $context, $match) === 1;
         if ($isPost) {
-            return [['label' => 'Edit post', 'icon' => 'bx-edit-alt', 'path' => 'blog/edit/?id=' . (int)$match[1], 'primary' => true]];
+            return [['label' => 'Edit post', 'icon' => 'bx-news', 'path' => 'blog/edit/?id=' . (int)$match[1], 'primary' => true]];
         }
 
         $isIndex = $context === 'blog-index:all';
