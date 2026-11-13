@@ -26,6 +26,12 @@
         ],
         "mcp.tools": [
             "Osmium\\Services\\Blog\\Models\\BlogMcp::tools"
+        ],
+        "adminbar.context": [
+            "Osmium\\Services\\Blog\\Models\\BlogAdminBar::context"
+        ],
+        "adminbar.links": [
+            "Osmium\\Services\\Blog\\Models\\BlogAdminBar::links"
         ]
     },
     "admin": {
