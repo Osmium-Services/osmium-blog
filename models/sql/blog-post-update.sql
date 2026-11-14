@@ -1,5 +1,6 @@
 UPDATE {TABLE}
 SET excerpt = :excerpt,
+    link_text = :link_text,
     body = :body,
     hero_image = :hero_image,
     social_image = :social_image,

@@ -2,6 +2,7 @@ SELECT
     p.id,
     p.page_id,
     p.excerpt,
+    p.link_text,
     p.body,
     p.hero_image,
     p.social_image,

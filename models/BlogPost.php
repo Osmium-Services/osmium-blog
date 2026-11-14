@@ -102,21 +102,21 @@ class BlogPost extends Model
         return $this->database->resultset();
     }
 
-    public function create(int $pageId, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt): int
+    public function create(int $pageId, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt, ?string $linkText = null): int
     {
         $this->database->query($this->loadSqlFile('blog-post-insert.sql'));
         $this->database->bind(param: ':page_id', value: $pageId);
-        $this->bindContent($excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+        $this->bindContent($excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt, $linkText);
         $this->database->execute();
 
         return (int) $this->database->lastInsertId();
     }
 
-    public function update(int $id, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt): void
+    public function update(int $id, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt, ?string $linkText = null): void
     {
         $this->database->query($this->loadSqlFile('blog-post-update.sql'));
         $this->database->bind(param: ':id', value: $id);
-        $this->bindContent($excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+        $this->bindContent($excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt, $linkText);
         $this->database->execute();
     }
 
@@ -135,9 +135,10 @@ class BlogPost extends Model
         $this->database->execute();
     }
 
-    private function bindContent(?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt): void
+    private function bindContent(?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt, ?string $linkText = null): void
     {
         $this->database->bind(param: ':excerpt', value: $excerpt);
+        $this->database->bind(param: ':link_text', value: $linkText);
         $this->database->bind(param: ':body', value: $body);
         $this->database->bind(param: ':hero_image', value: $heroImage);
         $this->database->bind(param: ':social_image', value: $socialImage);
@@ -159,7 +160,7 @@ class BlogPost extends Model
 
     /**
      * Published posts, newest first, for the blog index and a theme's "latest posts". Each row has
-     * id, excerpt, hero_image, published_at, url (the page address without a leading slash - link
+     * id, excerpt, link_text (the wording for the post's link, or null), hero_image, published_at, url (the page address without a leading slash - link
      * with $urls->to('/' . $url . '/')), title and the author's first_name and last_name. Posts dated
      * in the future stay hidden until their time.
      */

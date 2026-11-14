@@ -102,6 +102,12 @@
                         <div class="form-text">Changing it redirects the old address.</div>
                     </div>
                     <div class="mb-3">
+                        <label for="blogLinkText" class="form-label">Link text</label>
+                        <input type="text" class="form-control" id="blogLinkText" maxlength="100"
+                            value="<?= \htmlspecialchars($post['linkText']) ?>">
+                        <div class="form-text">The wording of this post's link where posts are listed, such as the home page. Leave blank for "Read more".</div>
+                    </div>
+                    <div class="mb-3">
                         <label for="blogDescription" class="form-label">Meta description</label>
                         <textarea class="form-control" id="blogDescription" rows="3" maxlength="320"><?= \htmlspecialchars($post['description']) ?></textarea>
                     </div>

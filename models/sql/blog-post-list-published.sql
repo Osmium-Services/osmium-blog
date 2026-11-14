@@ -1,6 +1,7 @@
 SELECT
     p.id,
     p.excerpt,
+    p.link_text,
     p.hero_image,
     p.published_at,
     pg.url,

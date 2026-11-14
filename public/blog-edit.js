@@ -333,6 +333,7 @@
             body: body,
             description: document.getElementById('blogDescription').value,
             excerpt: document.getElementById('blogExcerpt').value,
+            link_text: document.getElementById('blogLinkText').value,
             hero_image: document.getElementById('blogHeroValue').value,
             social_image: document.getElementById('blogSocialValue').value,
             author_user_id: document.getElementById('blogAuthor').value,

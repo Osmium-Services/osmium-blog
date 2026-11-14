@@ -73,6 +73,7 @@ class BlogController extends AdminController
             'addressPrefix' => '/' . BlogSettings::indexSlug() . '/',
             'description' => $post['description'] ?? '',
             'excerpt' => $post['excerpt'] ?? '',
+            'linkText' => $post['link_text'] ?? '',
             'heroImage' => $post['hero_image'] ?? '',
             'socialImage' => $post['social_image'] ?? '',
             'body' => $post['body'] ?? '',
@@ -138,6 +139,7 @@ class BlogController extends AdminController
         $body = BlogHtml::sanitize((string) ($input['body'] ?? '')); // The editor's DOMPurify is only a courtesy
         $isPublished = !empty($input['is_published']);
         $excerpt = \trim((string) ($input['excerpt'] ?? '')) ?: null;
+        $linkText = \mb_substr(\trim((string) ($input['link_text'] ?? '')), 0, 100) ?: null;
         $authorUserId = (int) ($input['author_user_id'] ?? 0) ?: null;
         $publishedAt = $this->publishedAt(input: $input, isPublished: $isPublished);
 
@@ -160,7 +162,7 @@ class BlogController extends AdminController
         if ($id === 0) {
             $pageId = $pages->create($pageFields);
             try {
-                $id = $model->create($pageId, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+                $id = $model->create($pageId, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt, $linkText);
             } catch (\Throwable $e) {
                 $pages->permanentDelete($pageId); // No post to show for it: free the address instead of leaving an orphan page
                 throw $e;
@@ -172,7 +174,7 @@ class BlogController extends AdminController
         }
 
         $pages->update((int) $existing['page_id'], $pageFields); // Redirects the old url when the slug changed
-        $model->update($id, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt);
+        $model->update($id, $excerpt, $body, $heroImage, $socialImage, $authorUserId, $isPublished, $publishedAt, $linkText);
         $this->logChange(action: 'Updated', id: $id, name: $title);
         $_SESSION['blog_saved'] = true;
 
