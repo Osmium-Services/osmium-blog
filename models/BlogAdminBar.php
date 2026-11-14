@@ -42,7 +42,7 @@ class BlogAdminBar
         }
 
         $isIndex = $context === 'blog-index:all';
-        if ($isIndex) return [['label' => 'Blog posts', 'icon' => 'bx-news', 'path' => 'blog/', 'primary' => true]];
+        if ($isIndex) return [['label' => 'Edit blog posts', 'icon' => 'bx-news', 'path' => 'blog/', 'primary' => true]];
 
         return null;
     }
