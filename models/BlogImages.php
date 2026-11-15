@@ -53,7 +53,7 @@ class BlogImages
      */
     public static function thumbBase(string $path): string
     {
-        return \dirname($path) . '/thumb/' . \pathinfo($path, \PATHINFO_FILENAME);
+        return \dirname($path) . '/thumb/' . \str_replace('.', '-', \pathinfo($path, \PATHINFO_FILENAME)); // A dot in the name would read as an extension to core's Image
     }
 
     /**
@@ -71,36 +71,7 @@ class BlogImages
 
         $tools = new ImageTools();
         $small = $tools->fit($tools->load($source, ['image/webp', 'image/jpeg', 'image/png']), self::THUMB_SIDE);
-        $flat = \imagecreatetruecolor(\imagesx($small), \imagesy($small)); // A JPG has no transparency: put it on white
-        \imagefill($flat, 0, 0, (int) \imagecolorallocate($flat, 255, 255, 255));
-        \imagecopy($flat, $small, 0, 0, 0, 0, \imagesx($small), \imagesy($small));
-
-        $dir = \dirname($base);
-        foreach ([$dir, $dir . '/webp', $dir . '/avif'] as $folder) {
-            if (!\is_dir($folder) && !@\mkdir($folder, 0755, true) && !\is_dir($folder)) throw new \RuntimeException('Could not create the thumb folder');
-        }
-        $name = \basename($base);
-        if (!\imagejpeg(image: $flat, file: $jpg, quality: 75)) throw new \RuntimeException('Could not save the thumbnail');
-        if (\function_exists('imagewebp')) \imagewebp(image: $flat, file: $dir . '/webp/' . $name . '.webp', quality: 70);
-        if (\function_exists('imageavif')) \imageavif(image: $flat, file: $dir . '/avif/' . $name . '.avif', quality: 50);
-    }
-
-    /**
-     * Best thumbnail that exists, AVIF then WebP then JPG (core's order), or '' when there is none. For heroes core's Image
-     * can't reach, such as imported ones outside the images folder.
-     */
-    public static function listImage(string $path, string $documentRoot): string
-    {
-        if (self::localFile($path, $documentRoot) === null) return '';
-
-        $base = self::thumbBase($path);
-        $dir = \dirname($base);
-        $name = \basename($base);
-        foreach ([$dir . '/avif/' . $name . '.avif', $dir . '/webp/' . $name . '.webp', $base . '.jpg'] as $candidate) {
-            if (\is_file(\rtrim($documentRoot, '/') . $candidate)) return $candidate;
-        }
-
-        return '';
+        $tools->storeVariants($small, \dirname($base), \basename($base), ['jpg' => 75, 'webp' => 70, 'avif' => 50]);
     }
 
     /**

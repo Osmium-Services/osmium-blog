@@ -339,7 +339,7 @@ class BlogController extends AdminController
     }
 
     /**
-     * The thumbnail the lists show: core's Image picks the best of AVIF, WebP and JPG, with a blank when there is none
+     * The thumbnail the lists show: core's Image picks the best of AVIF, WebP and JPG, and returns '' when there is none
      */
     private function heroThumb(string $heroImage): string
     {
@@ -347,10 +347,9 @@ class BlogController extends AdminController
 
         $images = (string) $this->osmium->config->site->imagesPath;
         $base = BlogImages::thumbBase($heroImage);
-        $underImages = \str_starts_with($base, $images . '/');
-        $found = $underImages ? $this->osmium->imagePath(\substr($base, \strlen($images))) : '';
+        if (!\str_starts_with($base, $images . '/')) return ''; // Core's Image only looks under the images folder
 
-        return $found !== '' ? $found : BlogImages::listImage($heroImage, $_SERVER['DOCUMENT_ROOT']);
+        return $this->osmium->imagePath(\substr($base, \strlen($images)));
     }
 
     private function formatRecentPost(array $post): array
