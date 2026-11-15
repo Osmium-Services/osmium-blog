@@ -222,6 +222,8 @@
             preview.src = has ? value.value : '';
             preview.classList.toggle('d-none', !has);
             empty.classList.toggle('d-none', has);
+            empty.textContent = 'No image'; // Replaces the editor's "file missing" warning once the slot is changed
+            empty.classList.replace('text-danger', 'text-muted');
             remove.classList.toggle('d-none', !has);
         }
 

@@ -76,6 +76,8 @@ class BlogController extends AdminController
             'linkText' => $post['link_text'] ?? '',
             'heroImage' => $post['hero_image'] ?? '',
             'socialImage' => $post['social_image'] ?? '',
+            'heroPreview' => $this->previewUrl($post['hero_image'] ?? ''),
+            'socialPreview' => $this->previewUrl($post['social_image'] ?? ''),
             'body' => $post['body'] ?? '',
             'authorUserId' => (int) ($post['author_user_id'] ?? (BlogSettings::get()['defaultAuthorId'] ?: $this->getCurrentUserId())),
             'isPublished' => (bool) ($post['is_published'] ?? false),
@@ -211,6 +213,19 @@ class BlogController extends AdminController
         $stored = (new BlogImages())->store(file: $file, maxBytes: $maxUpload['bytes'], documentRoot: $_SERVER['DOCUMENT_ROOT'], postSlug: $postSlug);
 
         return ['success' => true] + $stored;
+    }
+
+    /**
+     * What the editor's image preview loads. An image missing from the server gives '' so the editor says so, and the
+     * file's modified time on the address means a stale copy in the browser is never shown for a file that has changed.
+     */
+    private function previewUrl(string $path): string
+    {
+        if ($path === '' || $path[0] !== '/') return $path;
+
+        $file = $_SERVER['DOCUMENT_ROOT'] . $path;
+
+        return \is_file($file) ? $path . '?v=' . \filemtime($file) : '';
     }
 
     /**

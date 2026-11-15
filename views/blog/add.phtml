@@ -42,16 +42,16 @@
                 <div class="card-body">
                     <div class="row g-4">
                         <?php foreach ([
-                            ['id' => 'blogHero', 'label' => 'Hero image', 'help' => 'Shown at the top of the post and on the blog index.', 'value' => $post['heroImage']],
-                            ['id' => 'blogSocial', 'label' => 'Social image', 'help' => 'Used for link previews. Defaults to the hero image.', 'value' => $post['socialImage']],
+                            ['id' => 'blogHero', 'label' => 'Hero image', 'help' => 'Shown at the top of the post and on the blog index.', 'value' => $post['heroImage'], 'preview' => $post['heroPreview']],
+                            ['id' => 'blogSocial', 'label' => 'Social image', 'help' => 'Used for link previews. Defaults to the hero image.', 'value' => $post['socialImage'], 'preview' => $post['socialPreview']],
                         ] as $slot): ?>
                             <div class="col-md-6" data-image-slot="<?= $slot['id'] ?>">
                                 <label class="form-label"><?= $slot['label'] ?></label>
                                 <input type="hidden" id="<?= $slot['id'] ?>Value" value="<?= \htmlspecialchars($slot['value']) ?>">
                                 <div class="border rounded mb-2 d-flex align-items-center justify-content-center bg-light" style="height: 150px; overflow: hidden;">
-                                    <img id="<?= $slot['id'] ?>Preview" alt="" class="mw-100 mh-100 <?= $slot['value'] ? '' : 'd-none' ?>"
-                                        src="<?= \htmlspecialchars($slot['value']) ?>">
-                                    <span id="<?= $slot['id'] ?>Empty" class="text-muted small <?= $slot['value'] ? 'd-none' : '' ?>">No image</span>
+                                    <img id="<?= $slot['id'] ?>Preview" alt="" class="mw-100 mh-100 <?= $slot['preview'] ? '' : 'd-none' ?>"
+                                        src="<?= \htmlspecialchars($slot['preview']) ?>">
+                                    <span id="<?= $slot['id'] ?>Empty" class="small <?= $slot['value'] && !$slot['preview'] ? 'text-danger' : 'text-muted' ?> <?= $slot['preview'] ? 'd-none' : '' ?>"><?= $slot['value'] && !$slot['preview'] ? 'Image file missing from the server' : 'No image' ?></span>
                                 </div>
                                 <button type="button" class="btn btn-sm btn-label-primary" data-image-choose><i class="bx bx-upload me-1"></i> Choose image</button>
                                 <button type="button" class="btn btn-sm btn-label-secondary <?= $slot['value'] ? '' : 'd-none' ?>" data-image-remove>Remove</button>
