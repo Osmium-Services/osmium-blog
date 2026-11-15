@@ -7,7 +7,7 @@ declare(strict_types=1);
  * same vocabulary as lists/posts.php but nothing is shared with it. The actions are a copy of the list's for now.
  */
 return [
-    'columns' => 4,
+    'columns' => 3,
     'imageHeight' => 130,
     'image' => ['key' => 'hero_thumb_grid', 'type' => 'image', 'altKey' => 'title'],
     'title' => [
