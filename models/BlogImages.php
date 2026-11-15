@@ -20,11 +20,14 @@ class BlogImages
 
     /**
      * @param array{tmp_name?: string, name?: string, error?: int, size?: int} $file one entry of $_FILES
+     * @param string $postSlug The post's address name: its images go in a folder of that name, as on the old site
      * @return array{url: string, width: int, height: int}
      */
-    public function store(array $file, int $maxBytes, string $documentRoot): array
+    public function store(array $file, int $maxBytes, string $documentRoot, string $postSlug = ''): array
     {
-        $directory = \rtrim($documentRoot, '/') . self::URL_PREFIX;
+        $folder = \trim((string) \preg_replace('/[^a-z0-9]+/', '-', \strtolower($postSlug)), '-');
+        $folder = $folder === '' ? '' : \substr($folder, 0, 100) . '/';
+        $directory = \rtrim($documentRoot, '/') . self::URL_PREFIX . $folder;
         $baseName = $this->safeName((string) ($file['name'] ?? 'image'));
         $filename = $baseName . '-' . \bin2hex(\random_bytes(3)) . '.webp';
 
@@ -36,7 +39,7 @@ class BlogImages
             quality: self::WEBP_QUALITY,
         );
 
-        return ['url' => self::URL_PREFIX . $filename, 'width' => $size['width'], 'height' => $size['height']];
+        return ['url' => self::URL_PREFIX . $folder . $filename, 'width' => $size['width'], 'height' => $size['height']];
     }
 
     /**
@@ -44,7 +47,7 @@ class BlogImages
      */
     public static function isBlogImage(string $path): bool
     {
-        return \preg_match('#^' . \preg_quote(self::URL_PREFIX, '#') . '[a-z0-9._-]+\.webp$#', $path) === 1;
+        return \preg_match('#^' . \preg_quote(self::URL_PREFIX, '#') . '([a-z0-9-]+/)?[a-z0-9._-]+\.webp$#', $path) === 1;
     }
 
     /**

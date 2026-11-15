@@ -126,6 +126,7 @@
         formData.append('csrf_token', window.csrfToken);
         formData.append('action', 'upload_image');
         formData.append('image', file);
+        formData.append('slug', slugInput.value);
 
         const response = await fetch(actionUrl, { method: 'POST', body: formData });
         const data = await response.json();

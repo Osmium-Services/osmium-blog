@@ -113,7 +113,7 @@ class BlogController extends AdminController
                 'delete' => $this->deletePost($id, (string) ($input['redirect_target'] ?? '')),
                 'restore' => $this->restorePost($id),
                 'permanently_delete' => $this->permanentlyDeletePost($id),
-                'upload_image' => $this->uploadImage($_FILES['image'] ?? []),
+                'upload_image' => $this->uploadImage($_FILES['image'] ?? [], (string) ($_POST['slug'] ?? '')),
                 'link_targets' => ['success' => true, 'targets' => $this->linkTargets()],
                 default => throw new \InvalidArgumentException('Unknown action'),
             };
@@ -205,10 +205,10 @@ class BlogController extends AdminController
     /**
      * @return array{success: bool, url: string, width: int, height: int}
      */
-    private function uploadImage(array $file): array
+    private function uploadImage(array $file, string $postSlug): array
     {
         $maxUpload = \Osmium\Modules\Admin\Services\OsmiumAdmin::getMaxUploadSize();
-        $stored = (new BlogImages())->store(file: $file, maxBytes: $maxUpload['bytes'], documentRoot: $_SERVER['DOCUMENT_ROOT']);
+        $stored = (new BlogImages())->store(file: $file, maxBytes: $maxUpload['bytes'], documentRoot: $_SERVER['DOCUMENT_ROOT'], postSlug: $postSlug);
 
         return ['success' => true] + $stored;
     }
