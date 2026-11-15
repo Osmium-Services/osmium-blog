@@ -43,6 +43,7 @@ return [
         'order' => null, // keep the server's newest-first order until a header is clicked
         'grid' => require __DIR__ . '/../grids/posts.php',
         'columns' => [
+            ['key' => 'hero_image', 'label' => '', 'type' => 'image', 'altKey' => 'title', 'sortable' => false, 'hideBelow' => 'md'],
             [
                 'key' => 'title',
                 'label' => 'Post',
