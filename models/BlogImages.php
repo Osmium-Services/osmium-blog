@@ -15,8 +15,7 @@ class BlogImages
     public const URL_PREFIX = '/assets/images/blog/';
     private const MAX_WIDTH = 1600;
     private const WEBP_QUALITY = 82;
-    private const THUMB_SIDE = 320;
-    private const THUMB_QUALITY = 75;
+    private const THUMB_SIDE = 240;
 
     /**
      * @param array{tmp_name?: string, name?: string, error?: int, size?: int} $file one entry of $_FILES
@@ -48,40 +47,60 @@ class BlogImages
     }
 
     /**
-     * The small copy of a hero image that the admin lists show, named beside it (photo.jpg -> photo-thumb.webp)
+     * The small copies of a hero image that the admin lists show, in a thumb/ folder beside it with avif/ and webp/
+     * folders under that, the same layout as the shop and carousel so core's Image can pick the best one. No extension:
+     * /assets/images/blog/photo.jpg -> /assets/images/blog/thumb/photo
      */
-    public static function thumbPath(string $path): string
+    public static function thumbBase(string $path): string
     {
-        return \preg_replace('/\.[a-z0-9]+$/i', '', $path) . '-thumb.webp';
+        return \dirname($path) . '/thumb/' . \pathinfo($path, \PATHINFO_FILENAME);
     }
 
     /**
-     * Make the thumbnail when it is missing or older than the image it came from. Works for any image on this site,
-     * not only ones uploaded in the editor, so imported posts get one too. A new hero is a different file, so it gets a fresh thumbnail.
+     * Make the thumbnails (JPG, plus WebP and AVIF where this PHP can write them) when missing or older than the image
+     * they came from. Works for any image on this site, so imported posts get them too. A new hero is a different file.
      */
     public function ensureThumbnail(string $path, string $documentRoot): void
     {
         $source = self::localFile($path, $documentRoot);
         if ($source === null) return;
 
-        $thumb = \rtrim($documentRoot, '/') . self::thumbPath($path);
-        if (\is_file($thumb) && \filemtime($thumb) >= \filemtime($source)) return;
+        $base = \rtrim($documentRoot, '/') . self::thumbBase($path);
+        $jpg = $base . '.jpg';
+        if (\is_file($jpg) && \filemtime($jpg) >= \filemtime($source)) return;
 
         $tools = new ImageTools();
         $small = $tools->fit($tools->load($source, ['image/webp', 'image/jpeg', 'image/png']), self::THUMB_SIDE);
-        if (!\imagewebp(image: $small, file: $thumb, quality: self::THUMB_QUALITY)) throw new \RuntimeException('Could not save the thumbnail');
+        $flat = \imagecreatetruecolor(\imagesx($small), \imagesy($small)); // A JPG has no transparency: put it on white
+        \imagefill($flat, 0, 0, (int) \imagecolorallocate($flat, 255, 255, 255));
+        \imagecopy($flat, $small, 0, 0, 0, 0, \imagesx($small), \imagesy($small));
+
+        $dir = \dirname($base);
+        foreach ([$dir, $dir . '/webp', $dir . '/avif'] as $folder) {
+            if (!\is_dir($folder) && !@\mkdir($folder, 0755, true) && !\is_dir($folder)) throw new \RuntimeException('Could not create the thumb folder');
+        }
+        $name = \basename($base);
+        if (!\imagejpeg(image: $flat, file: $jpg, quality: 75)) throw new \RuntimeException('Could not save the thumbnail');
+        if (\function_exists('imagewebp')) \imagewebp(image: $flat, file: $dir . '/webp/' . $name . '.webp', quality: 70);
+        if (\function_exists('imageavif')) \imageavif(image: $flat, file: $dir . '/avif/' . $name . '.avif', quality: 50);
     }
 
     /**
-     * The path the lists should show: the thumbnail when it exists, otherwise nothing. The full image is never used.
+     * Best thumbnail that exists, AVIF then WebP then JPG (core's order), or '' when there is none. For heroes core's Image
+     * can't reach, such as imported ones outside the images folder.
      */
     public static function listImage(string $path, string $documentRoot): string
     {
         if (self::localFile($path, $documentRoot) === null) return '';
 
-        $thumb = self::thumbPath($path);
+        $base = self::thumbBase($path);
+        $dir = \dirname($base);
+        $name = \basename($base);
+        foreach ([$dir . '/avif/' . $name . '.avif', $dir . '/webp/' . $name . '.webp', $base . '.jpg'] as $candidate) {
+            if (\is_file(\rtrim($documentRoot, '/') . $candidate)) return $candidate;
+        }
 
-        return \is_file(\rtrim($documentRoot, '/') . $thumb) ? $thumb : '';
+        return '';
     }
 
     /**

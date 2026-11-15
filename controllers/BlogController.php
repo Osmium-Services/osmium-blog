@@ -330,12 +330,27 @@ class BlogController extends AdminController
             'url_path' => '/' . $post['url'] . ($trailingSlash ? '/' : ''),
             'edit_url' => $this->getBasePath() . 'blog/edit/?id=' . (int) $post['id'],
             'author_name' => $author,
-            'hero_thumb' => BlogImages::listImage((string) ($post['hero_image'] ?? ''), $_SERVER['DOCUMENT_ROOT']),
+            'hero_thumb' => $this->heroThumb((string) ($post['hero_image'] ?? '')),
             'status_label' => $isPublished ? 'Published' : 'Draft',
             'status_class' => $isPublished ? 'success' : 'secondary',
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',
             'date_sort' => (string) $date,
         ];
+    }
+
+    /**
+     * The thumbnail the lists show: core's Image picks the best of AVIF, WebP and JPG, with a blank when there is none
+     */
+    private function heroThumb(string $heroImage): string
+    {
+        if ($heroImage === '') return '';
+
+        $images = (string) $this->osmium->config->site->imagesPath;
+        $base = BlogImages::thumbBase($heroImage);
+        $underImages = \str_starts_with($base, $images . '/');
+        $found = $underImages ? $this->osmium->imagePath(\substr($base, \strlen($images))) : '';
+
+        return $found !== '' ? $found : BlogImages::listImage($heroImage, $_SERVER['DOCUMENT_ROOT']);
     }
 
     private function formatRecentPost(array $post): array
