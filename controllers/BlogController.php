@@ -214,14 +214,14 @@ class BlogController extends AdminController
     }
 
     /**
-     * The lists show a small copy of the hero. A failure here must not stop the post saving: the lists fall back to the full image.
+     * The lists show a small copy of the hero. A failure here must not stop the post saving: the list image stays blank.
      */
     private function makeThumbnail(string $heroImage): void
     {
         try {
             (new BlogImages())->ensureThumbnail(path: $heroImage, documentRoot: $_SERVER['DOCUMENT_ROOT']);
-        } catch (\Throwable) {
-            // Left for the lists to fall back on the full image
+        } catch (\Throwable $e) {
+            \error_log('Blog hero thumbnail failed for ' . $heroImage . ': ' . $e->getMessage()); // The post still saves; its list image stays blank
         }
     }
 

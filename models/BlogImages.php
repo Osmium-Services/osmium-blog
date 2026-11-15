@@ -73,15 +73,15 @@ class BlogImages
     }
 
     /**
-     * The path the lists should show: the thumbnail when it exists, otherwise the full image
+     * The path the lists should show: the thumbnail when it exists, otherwise nothing. The full image is never used.
      */
     public static function listImage(string $path, string $documentRoot): string
     {
-        if (self::localFile($path, $documentRoot) === null) return $path;
+        if (self::localFile($path, $documentRoot) === null) return '';
 
         $thumb = self::thumbPath($path);
 
-        return \is_file(\rtrim($documentRoot, '/') . $thumb) ? $thumb : $path;
+        return \is_file(\rtrim($documentRoot, '/') . $thumb) ? $thumb : '';
     }
 
     /**
