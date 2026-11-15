@@ -13,6 +13,7 @@ namespace Osmium\Services\Blog\Models;
  * An unpublished post is shown only to a signed-in admin, with $blogIsPreview true (the theme may show a banner).
  *
  * Index view <section>/views/index.phtml (blog/views/index.phtml by default) gets $blogIndex: posts (newest first) and total.
+ * Each post row has hero_src, the best copy of its hero that core's Image finds, for the page to load; hero_image is the stored address.
  * Post view <section>/views/post.phtml gets $blogPost (the row), $blogAuthor and $blogPostSchema (a ready
  * <script type="application/ld+json"> tag to echo).
  */
@@ -29,7 +30,7 @@ class BlogClaim
         $posts = new BlogPost($payload['osmium']->dataSource);
 
         $isIndex = $payload['slug'] === BlogSettings::indexSlug();
-        if ($isIndex) return self::index($posts);
+        if ($isIndex) return self::index($posts, $payload['osmium']);
 
         $post = $posts->findPublishedByPageId($payload['pageId']);
         $isPreview = false;
@@ -57,9 +58,12 @@ class BlogClaim
         return $isSignedIn && !$isLocked;
     }
 
-    private static function index(BlogPost $posts): array
+    private static function index(BlogPost $posts, object $osmium): array
     {
-        $all = $posts->published(limit: self::INDEX_LIMIT);
+        $all = \array_map(
+            fn(array $post): array => $post + ['hero_src' => BlogImages::bestSrc((string) ($post['hero_image'] ?? ''), $osmium)],
+            $posts->published(limit: self::INDEX_LIMIT),
+        );
 
         return [
             'view' => BlogSettings::indexSlug() . '/views/index.phtml',
@@ -69,6 +73,7 @@ class BlogClaim
 
     private static function post(array $post, array $payload, bool $isPreview): array
     {
+        $post['hero_src'] = BlogImages::bestSrc((string) ($post['hero_image'] ?? ''), $payload['osmium']);
         $data = ['blogPost' => $post, 'blogAuthor' => BlogSchema::authorName($post), 'blogIsPreview' => $isPreview];
 
         // Link previews use the social image, else the hero; $site['socialImage'] is an absolute URL

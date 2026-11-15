@@ -84,6 +84,23 @@ class BlogImages
     }
 
     /**
+     * What a front-end page should load for a hero: asked of core's Image with no extension, so it gives back the best
+     * copy that exists (AVIF, then WebP, then JPG or PNG). The stored address when core has nothing better.
+     */
+    public static function bestSrc(string $heroImage, object $osmium): string
+    {
+        if ($heroImage === '') return '';
+
+        $images = (string) $osmium->config->site->imagesPath;
+        $partial = \preg_replace('/\.[a-z0-9]+$/i', '', $heroImage);
+        if (!\str_starts_with($partial, $images . '/')) return $heroImage;
+
+        $best = $osmium->imagePath(\substr($partial, \strlen($images)));
+
+        return $best !== '' ? $best : $heroImage;
+    }
+
+    /**
      * Make the hero's own WebP and AVIF copies (webp/name.webp and avif/name.avif beside it) when missing or older than
      * the hero, so core's Image can give the browser the best one. Copies that are already there are left alone.
      */
