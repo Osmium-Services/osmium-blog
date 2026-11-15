@@ -150,6 +150,7 @@ class BlogController extends AdminController
 
         $heroImage = $this->ownImage((string) ($input['hero_image'] ?? ''), $existing['hero_image'] ?? null);
         $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''), $existing['social_image'] ?? null);
+        if ($heroImage !== null) $this->makeThumbnail($heroImage);
 
         $pageFields = [
             'url' => BlogSettings::indexSlug() . '/' . $slug,
@@ -210,6 +211,18 @@ class BlogController extends AdminController
         $stored = (new BlogImages())->store(file: $file, maxBytes: $maxUpload['bytes'], documentRoot: $_SERVER['DOCUMENT_ROOT']);
 
         return ['success' => true] + $stored;
+    }
+
+    /**
+     * The lists show a small copy of the hero. A failure here must not stop the post saving: the lists fall back to the full image.
+     */
+    private function makeThumbnail(string $heroImage): void
+    {
+        try {
+            (new BlogImages())->ensureThumbnail(path: $heroImage, documentRoot: $_SERVER['DOCUMENT_ROOT']);
+        } catch (\Throwable) {
+            // Left for the lists to fall back on the full image
+        }
     }
 
     /**
@@ -317,6 +330,7 @@ class BlogController extends AdminController
             'url_path' => '/' . $post['url'] . ($trailingSlash ? '/' : ''),
             'edit_url' => $this->getBasePath() . 'blog/edit/?id=' . (int) $post['id'],
             'author_name' => $author,
+            'hero_thumb' => BlogImages::listImage((string) ($post['hero_image'] ?? ''), $_SERVER['DOCUMENT_ROOT']),
             'status_label' => $isPublished ? 'Published' : 'Draft',
             'status_class' => $isPublished ? 'success' : 'secondary',
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',

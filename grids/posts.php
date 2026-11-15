@@ -9,7 +9,7 @@ declare(strict_types=1);
 return [
     'columns' => 4,
     'imageHeight' => 130,
-    'image' => ['key' => 'hero_image', 'type' => 'image', 'altKey' => 'title'],
+    'image' => ['key' => 'hero_thumb', 'type' => 'image', 'altKey' => 'title'],
     'title' => [
         'key' => 'title',
         'type' => 'text',
