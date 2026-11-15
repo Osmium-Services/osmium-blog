@@ -15,8 +15,8 @@ class BlogImages
     public const URL_PREFIX = '/assets/images/blog/';
     private const MAX_WIDTH = 1920;
     private const WEBP_QUALITY = 82;
-    /** Folder name => longest side in pixels: the admin list shows a 50px box, the grid view about 250px wide */
-    public const THUMBS = ['thumb-list' => 136, 'thumb-grid' => 240];
+    /** Name suffix => longest side in pixels: the admin list shows a 50px box, the grid view about 250px wide */
+    public const THUMBS = ['list' => 136, 'grid' => 240];
 
     /**
      * @param array{tmp_name?: string, name?: string, error?: int, size?: int} $file one entry of $_FILES
@@ -51,13 +51,15 @@ class BlogImages
     }
 
     /**
-     * The small copies of a hero image that the admin lists show, in a thumb-list/ or thumb-grid/ folder beside it with
-     * avif/ and webp/ folders under that, the same layout as the shop and carousel so core's Image can pick the best one.
-     * No extension: /assets/images/blog/photo.jpg -> /assets/images/blog/thumb-list/photo
+     * The small copies of a hero image that the admin lists show, named beside it with -list or -grid on the name, and
+     * their webp/ and avif/ copies in the same folders as the hero's own, so core's Image can pick the best one.
+     * No extension: /assets/images/blog/post/photo.jpg -> /assets/images/blog/post/photo-list
      */
     public static function thumbBase(string $path, string $kind): string
     {
-        return \dirname($path) . '/' . $kind . '/' . \str_replace('.', '-', \pathinfo($path, \PATHINFO_FILENAME)); // A dot in the name would read as an extension to core's Image
+        $name = \str_replace('.', '-', \pathinfo($path, \PATHINFO_FILENAME)); // A dot in the name would read as an extension to core's Image
+
+        return \dirname($path) . '/' . $name . '-' . $kind;
     }
 
     /**
