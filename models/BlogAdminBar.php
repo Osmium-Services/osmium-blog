@@ -13,7 +13,7 @@ class BlogAdminBar
 {
     /**
      * @param array{data?: array<string, mixed>} $payload the finished page's view data
-     * @return string|null "blog-post:12" on a post, "blog-index:all" on the index, null elsewhere
+     * @return string|null "blog-post:12" on a post, "blog-index:all" on the index or a page listing the latest posts, null elsewhere
      */
     public static function context(array $payload): ?string
     {
@@ -24,8 +24,11 @@ class BlogAdminBar
         if ($isPost) return "blog-post:{$postId}";
 
         $isIndex = isset($data['blogIndex']);
+        if ($isIndex) return 'blog-index:all';
 
-        return $isIndex ? 'blog-index:all' : null;
+        $showsLatestPosts = !empty($data['latestPosts']);
+
+        return $showsLatestPosts ? 'blog-index:all' : null; // A page listing the latest posts (the home page) gets the same link as the index
     }
 
     /**
