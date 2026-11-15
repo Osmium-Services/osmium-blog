@@ -75,6 +75,20 @@ class BlogImages
     }
 
     /**
+     * Make the hero's own WebP and AVIF copies (webp/name.webp and avif/name.avif beside it) when missing or older than
+     * the hero, so core's Image can give the browser the best one. Copies that are already there are left alone.
+     */
+    public function ensureOptimised(string $path, string $documentRoot): void
+    {
+        $source = self::localFile($path, $documentRoot);
+        if ($source === null) return;
+
+        $tools = new ImageTools();
+        $image = $tools->load($source, ['image/webp', 'image/jpeg', 'image/png']);
+        $tools->storeOptimised($image, \dirname($source), \pathinfo($source, \PATHINFO_FILENAME), ['webp' => self::WEBP_QUALITY, 'avif' => 60], (int) \filemtime($source));
+    }
+
+    /**
      * Full file path of a site-relative image, or null for an address elsewhere, a missing file, or a path that climbs out of the site
      */
     private static function localFile(string $path, string $documentRoot): ?string

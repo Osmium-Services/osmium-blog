@@ -150,7 +150,7 @@ class BlogController extends AdminController
 
         $heroImage = $this->ownImage((string) ($input['hero_image'] ?? ''), $existing['hero_image'] ?? null);
         $socialImage = $this->ownImage((string) ($input['social_image'] ?? ''), $existing['social_image'] ?? null);
-        if ($heroImage !== null) $this->makeThumbnail($heroImage);
+        if ($heroImage !== null) $this->makeImageCopies($heroImage);
 
         $pageFields = [
             'url' => BlogSettings::indexSlug() . '/' . $slug,
@@ -214,14 +214,18 @@ class BlogController extends AdminController
     }
 
     /**
-     * The lists show a small copy of the hero. A failure here must not stop the post saving: the list image stays blank.
+     * Saving a hero makes its thumbnail and its own WebP and AVIF copies when they are missing. A failure here must not
+     * stop the post saving: it is logged, and the list image stays blank.
      */
-    private function makeThumbnail(string $heroImage): void
+    private function makeImageCopies(string $heroImage): void
     {
-        try {
-            (new BlogImages())->ensureThumbnail(path: $heroImage, documentRoot: $_SERVER['DOCUMENT_ROOT']);
-        } catch (\Throwable $e) {
-            \error_log('Blog hero thumbnail failed for ' . $heroImage . ': ' . $e->getMessage()); // The post still saves; its list image stays blank
+        $images = new BlogImages();
+        foreach (['ensureThumbnail', 'ensureOptimised'] as $method) {
+            try {
+                $images->$method(path: $heroImage, documentRoot: $_SERVER['DOCUMENT_ROOT']);
+            } catch (\Throwable $e) {
+                \error_log('Blog hero ' . $method . ' failed for ' . $heroImage . ': ' . $e->getMessage());
+            }
         }
     }
 
