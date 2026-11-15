@@ -29,7 +29,7 @@ class BlogImages
         $folder = $folder === '' ? '' : \substr($folder, 0, 100) . '/';
         $directory = \rtrim($documentRoot, '/') . self::URL_PREFIX . $folder;
         $baseName = $this->safeName((string) ($file['name'] ?? 'image'));
-        $filename = $baseName . '-' . \bin2hex(\random_bytes(3)) . '.webp';
+        $filename = $this->freeName($directory, $baseName);
 
         $size = (new ImageTools())->storeAsWebp(
             file: $file,
@@ -107,6 +107,20 @@ class BlogImages
         $file = \rtrim($documentRoot, '/') . $path;
 
         return \is_file($file) ? $file : null;
+    }
+
+    /**
+     * The plain name, kept readable for the address bar and search engines; a number is added only when that name is
+     * taken in the folder, so an earlier image is never overwritten
+     */
+    private function freeName(string $directory, string $baseName): string
+    {
+        $filename = $baseName . '.webp';
+        for ($number = 2; \is_file($directory . $filename); $number++) {
+            $filename = $baseName . '-' . $number . '.webp';
+        }
+
+        return $filename;
     }
 
     private function safeName(string $originalName): string
