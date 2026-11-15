@@ -13,9 +13,10 @@ use Osmium\Core\Library\ImageTools;
 class BlogImages
 {
     public const URL_PREFIX = '/assets/images/blog/';
-    private const MAX_WIDTH = 1600;
+    private const MAX_WIDTH = 1920;
     private const WEBP_QUALITY = 82;
-    private const THUMB_SIDE = 240;
+    /** Folder name => longest side in pixels: the admin list shows a 50px box, the grid view about 250px wide */
+    public const THUMBS = ['thumb-list' => 136, 'thumb-grid' => 240];
 
     /**
      * @param array{tmp_name?: string, name?: string, error?: int, size?: int} $file one entry of $_FILES
@@ -47,31 +48,34 @@ class BlogImages
     }
 
     /**
-     * The small copies of a hero image that the admin lists show, in a thumb/ folder beside it with avif/ and webp/
-     * folders under that, the same layout as the shop and carousel so core's Image can pick the best one. No extension:
-     * /assets/images/blog/photo.jpg -> /assets/images/blog/thumb/photo
+     * The small copies of a hero image that the admin lists show, in a thumb-list/ or thumb-grid/ folder beside it with
+     * avif/ and webp/ folders under that, the same layout as the shop and carousel so core's Image can pick the best one.
+     * No extension: /assets/images/blog/photo.jpg -> /assets/images/blog/thumb-list/photo
      */
-    public static function thumbBase(string $path): string
+    public static function thumbBase(string $path, string $kind): string
     {
-        return \dirname($path) . '/thumb/' . \str_replace('.', '-', \pathinfo($path, \PATHINFO_FILENAME)); // A dot in the name would read as an extension to core's Image
+        return \dirname($path) . '/' . $kind . '/' . \str_replace('.', '-', \pathinfo($path, \PATHINFO_FILENAME)); // A dot in the name would read as an extension to core's Image
     }
 
     /**
-     * Make the thumbnails (JPG, plus WebP and AVIF where this PHP can write them) when missing or older than the image
-     * they came from. Works for any image on this site, so imported posts get them too. A new hero is a different file.
+     * Make the thumbnails (JPG, plus WebP and AVIF where this PHP can write them) in each size when missing or older than
+     * the image they came from. Works for any image on this site, so imported posts get them too. A new hero is a different file.
      */
     public function ensureThumbnail(string $path, string $documentRoot): void
     {
         $source = self::localFile($path, $documentRoot);
         if ($source === null) return;
 
-        $base = \rtrim($documentRoot, '/') . self::thumbBase($path);
-        $jpg = $base . '.jpg';
-        if (\is_file($jpg) && \filemtime($jpg) >= \filemtime($source)) return;
-
         $tools = new ImageTools();
-        $small = $tools->fit($tools->load($source, ['image/webp', 'image/jpeg', 'image/png']), self::THUMB_SIDE);
-        $tools->storeVariants($small, \dirname($base), \basename($base), ['jpg' => 75, 'webp' => 70, 'avif' => 50]);
+        $image = null;
+        foreach (self::THUMBS as $kind => $side) {
+            $base = \rtrim($documentRoot, '/') . self::thumbBase($path, $kind);
+            $jpg = $base . '.jpg';
+            if (\is_file($jpg) && \filemtime($jpg) >= \filemtime($source)) continue;
+
+            $image ??= $tools->load($source, ['image/webp', 'image/jpeg', 'image/png']);
+            $tools->storeVariants($tools->fit($image, $side), \dirname($base), \basename($base), ['jpg' => 75, 'webp' => 70, 'avif' => 50]);
+        }
     }
 
     /**

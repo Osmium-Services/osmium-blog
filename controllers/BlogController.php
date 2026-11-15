@@ -334,7 +334,8 @@ class BlogController extends AdminController
             'url_path' => '/' . $post['url'] . ($trailingSlash ? '/' : ''),
             'edit_url' => $this->getBasePath() . 'blog/edit/?id=' . (int) $post['id'],
             'author_name' => $author,
-            'hero_thumb' => $this->heroThumb((string) ($post['hero_image'] ?? '')),
+            'hero_thumb_list' => $this->heroThumb((string) ($post['hero_image'] ?? ''), 'thumb-list'),
+            'hero_thumb_grid' => $this->heroThumb((string) ($post['hero_image'] ?? ''), 'thumb-grid'),
             'status_label' => $isPublished ? 'Published' : 'Draft',
             'status_class' => $isPublished ? 'success' : 'secondary',
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',
@@ -345,12 +346,12 @@ class BlogController extends AdminController
     /**
      * The thumbnail the lists show: core's Image picks the best of AVIF, WebP and JPG, and returns '' when there is none
      */
-    private function heroThumb(string $heroImage): string
+    private function heroThumb(string $heroImage, string $kind): string
     {
         if ($heroImage === '') return '';
 
         $images = (string) $this->osmium->config->site->imagesPath;
-        $base = BlogImages::thumbBase($heroImage);
+        $base = BlogImages::thumbBase($heroImage, $kind);
         if (!\str_starts_with($base, $images . '/')) return ''; // Core's Image only looks under the images folder
 
         return $this->osmium->imagePath(\substr($base, \strlen($images)));
