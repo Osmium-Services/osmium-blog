@@ -9,7 +9,8 @@
     const titleInput = document.getElementById('blogTitle');
     const saveButton = document.getElementById('blogSaveButton');
 
-    // No inline style or class: the theme styles the post body from its own CSS
+    // No inline style or class: the theme styles the post body from its own CSS. The one exception is a heading
+    // size class (h3 or h4) on an h2-h4, which keeps a heading's size when its level changes (same rule as BlogHtml.php)
     const purifyConfig = {
         ALLOWED_TAGS: [
             'p', 'br', 'strong', 'em', 'u', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'a', 'blockquote',
@@ -297,6 +298,11 @@
             }
         },
         styleTags: ['p', 'h2', 'h3', 'h4', 'blockquote']
+    });
+
+    DOMPurify.addHook('uponSanitizeAttribute', function (node, data) {
+        const isHeading = ['H2', 'H3', 'H4'].indexOf(node.nodeName) !== -1;
+        if (data.attrName === 'class' && isHeading && ['h3', 'h4'].indexOf(data.attrValue.trim()) !== -1) data.forceKeepAttr = true;
     });
 
     function sanitize(html) {

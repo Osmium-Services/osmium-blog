@@ -18,6 +18,9 @@ class BlogHtml
     private const ALLOWED_ATTRIBUTES = [
         'href', 'target', 'rel', 'src', 'alt', 'width', 'height', 'loading', 'colspan', 'rowspan', 'scope',
     ];
+    /** A heading may carry one of these classes to keep its size when its level is changed (an h4 shown as an h2 stays h4-sized) */
+    private const HEADING_TAGS = ['h2', 'h3', 'h4'];
+    private const HEADING_SIZE_CLASSES = ['h3', 'h4'];
     private const URL_ATTRIBUTES = ['href', 'src'];
     private const DROPPED_WITH_CONTENT = ['script', 'style', 'iframe', 'object', 'embed', 'template', 'noscript', 'svg', 'math'];
 
@@ -96,9 +99,17 @@ class BlogHtml
             $isAllowed = \in_array($name, self::ALLOWED_ATTRIBUTES, true);
             $isUrl = \in_array($name, self::URL_ATTRIBUTES, true);
             $isUnsafeUrl = $isUrl && !self::isSafeUrl($attribute->value);
+            $isHeadingSize = $name === 'class' && self::isHeadingSizeClass($element, $attribute->value);
 
-            if (!$isAllowed || $isUnsafeUrl) $element->removeAttribute($attribute->name);
+            if ((!$isAllowed && !$isHeadingSize) || $isUnsafeUrl) $element->removeAttribute($attribute->name);
         }
+    }
+
+    private static function isHeadingSizeClass(\DOMElement $element, string $value): bool
+    {
+        $isHeading = \in_array(\strtolower($element->tagName), self::HEADING_TAGS, true);
+
+        return $isHeading && \in_array(\trim($value), self::HEADING_SIZE_CLASSES, true);
     }
 
     private static function isSafeUrl(string $url): bool

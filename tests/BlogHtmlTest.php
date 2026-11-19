@@ -37,6 +37,15 @@ final class BlogHtmlTest extends TestCase
         $this->assertSame('<p>t</p><img src="/a.png">', $clean);
     }
 
+    public function test_a_heading_keeps_only_a_heading_size_class(): void
+    {
+        $this->assertSame('<h2 class="h4">t</h2>', BlogHtml::sanitize('<h2 class="h4">t</h2>'));
+        $this->assertSame('<h3 class="h3">t</h3>', BlogHtml::sanitize('<h3 class="h3">t</h3>'));
+        $this->assertSame('<h2>t</h2>', BlogHtml::sanitize('<h2 class="h4 evil">t</h2>'));
+        $this->assertSame('<h2>t</h2>', BlogHtml::sanitize('<h2 class="accordion">t</h2>'));
+        $this->assertSame('<p>t</p>', BlogHtml::sanitize('<p class="h4">t</p>'));
+    }
+
     public function test_script_urls_are_removed_even_when_disguised(): void
     {
         foreach (['javascript:alert(1)', "java\tscript:alert(1)", ' JaVaScRiPt:alert(1)', 'data:text/html,x', 'vbscript:x', '&#106;avascript:alert(1)'] as $bad) {
