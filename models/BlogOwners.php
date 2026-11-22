@@ -16,7 +16,13 @@ class BlogOwners
      */
     public static function pages(array $payload): array
     {
-        $posts = new BlogPost($payload['osmium']->dataSource);
+        return self::owned($payload['osmium']->dataSource);
+    }
+
+    /** @return array<int, array{label: string, editUrl: string}> keyed by page id */
+    private static function owned(object $dataSource): array
+    {
+        $posts = new BlogPost($dataSource);
 
         $owned = [];
         foreach ($posts->ownedPages() as $row) {
@@ -27,5 +33,16 @@ class BlogOwners
         if ($indexPageId !== null) $owned[$indexPageId] = ['label' => 'Blog', 'editUrl' => 'blog/'];
 
         return $owned;
+    }
+
+    /**
+     * The blog's posts and index page, for the `sitemap.groups` hook: one child sitemap of its own.
+     *
+     * @param array{dataSource: object} $payload
+     * @return array{key: string, label: string, pageIds: array<int, int>}
+     */
+    public static function sitemapGroups(array $payload): array
+    {
+        return ['key' => 'blog', 'label' => 'Blog', 'pageIds' => \array_keys(self::owned($payload['dataSource']))];
     }
 }
