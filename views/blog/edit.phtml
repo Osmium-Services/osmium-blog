@@ -167,4 +167,7 @@
         editUrl: <?= \json_encode($adminUrl('blog/edit/')) ?>
     };
 </script>
+<script nonce="<?= $cspNonce ?? '' ?>">
+    initPresenceTracking(adminBasePath + 'blog/action/', <?= (int) $post['id'] ?>, { formSelector: '#blogForm' });
+</script>
 <script src="/assets/services/osmium-blog/blog-edit.js<?= $adminAssetVersion('/assets/services/osmium-blog/blog-edit.js') ?>"></script>

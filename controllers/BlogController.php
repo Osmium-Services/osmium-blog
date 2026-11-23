@@ -39,6 +39,7 @@ class BlogController extends AdminController
         $this->data['admin']['deletedPosts'] = \array_map($this->formatPost(...), (new BlogPost($this->osmium->dataSource))->listDeleted());
         $this->data['admin']['redirectTargets'] = $this->linkTargets();
         $this->data['admin']['lists'] = require __DIR__ . '/../lists/posts.php';
+        $this->data['admin']['activeEditors'] = $this->activeEditors(self::RECORD_TYPE);
 
         $this->setView('blog/index.phtml');
     }
@@ -59,6 +60,7 @@ class BlogController extends AdminController
         $post = $id ? $model->getById($id) : null;
         if (!$post) $this->redirect('blog/');
 
+        $this->openRecord(recordType: self::RECORD_TYPE, recordId: $id);
         $this->prepareFormData(model: $model, id: $id, post: $post);
         $this->setView('blog/edit.phtml');
     }
@@ -103,10 +105,13 @@ class BlogController extends AdminController
         if (!$isPost) $this->admin->jsonError('Method not allowed');
 
         $input = $this->admin->auth->getJsonInput();
+        $action = $input['action'] ?? '';
+
+        $this->handlePresence(action: $action, input: $input, recordType: self::RECORD_TYPE);
+
         $csrfValid = $this->admin->auth->validateCsrfJson($input);
         if (!$csrfValid) $this->admin->jsonError('Invalid request token. Please refresh and try again.');
 
-        $action = $input['action'] ?? '';
         $id = (int) ($input['id'] ?? 0);
 
         try {

@@ -39,6 +39,7 @@ return [
         'title' => 'Posts',
         'noun' => ['post', 'posts'],
         'endpoint' => 'blog/action/',
+        'presence' => 'blog_post',
         'emptyText' => 'No posts yet. Use New Post to write the first.',
         'order' => null, // keep the server's newest-first order until a header is clicked
         'grid' => require __DIR__ . '/../grids/posts.php',

@@ -7,7 +7,7 @@ use Osmium\Services\Blog\Models\BlogText;
 $listContext = [
     'adminUrl' => $adminUrl,
     'isAdmin' => $admin['isAdmin'],
-    'editors' => [],
+    'editors' => $admin['activeEditors'] ?? [],
     'avatarUrl' => $admin['avatarUrl'] ?? '',
 ];
 ?>
