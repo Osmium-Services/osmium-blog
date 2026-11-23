@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Services\Blog;
 
+use Osmium\Core\Library\AdminPaths;
 use Osmium\Core\Library\McpToolException;
 use Osmium\Modules\Admin\Models\Page;
 use Osmium\Modules\Admin\Services\AdminPages;
@@ -13,8 +14,11 @@ use Osmium\Services\Blog\Models\BlogMcp;
 use Osmium\Services\Blog\Models\BlogPost;
 use Tests\Integration\DatabaseTestCase;
 
+require_once AdminPaths::path('models/AdminModel.php');
+require_once AdminPaths::path('models/Page.php');
 require_once __DIR__ . '/../models/BlogPost.php';
 require_once __DIR__ . '/../models/BlogText.php';
+require_once __DIR__ . '/../models/BlogSettings.php';
 require_once __DIR__ . '/../models/BlogClaim.php';
 require_once __DIR__ . '/../models/BlogDraft.php';
 require_once __DIR__ . '/../models/BlogBin.php';
@@ -168,7 +172,7 @@ class BlogDraftBinTest extends DatabaseTestCase
     public function test_if_saving_the_post_fails_the_page_just_made_is_removed_so_no_orphan_is_left(): void
     {
         $failing = new class ($this->db) extends BlogPost {
-            public function create(int $pageId, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt): int
+            public function create(int $pageId, ?string $excerpt, string $body, ?string $heroImage, ?string $socialImage, ?int $authorUserId, bool $isPublished, ?string $publishedAt, ?string $linkText = null): int
             {
                 throw new \RuntimeException('The post could not be saved');
             }

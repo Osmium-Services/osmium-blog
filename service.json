@@ -1,7 +1,7 @@
 {
     "id": "osmium-blog",
     "name": "Osmium Blog",
-    "version": "0.14.3",
+    "version": "0.15.0",
     "description": "Blog posts written in admin and published as ordinary pages under /blog/, with the markup supplied by the theme",
     "category": "content",
     "author": {
@@ -9,7 +9,7 @@
     },
     "license": "proprietary",
     "requires": {
-        "osmium": ">=1.0.0",
+        "osmium": ">=2.4.0",
         "php": ">=8.1",
         "services": []
     },
