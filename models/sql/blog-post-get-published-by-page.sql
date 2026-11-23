@@ -15,4 +15,5 @@ FROM {TABLE} p
 LEFT JOIN {PREFIX}users u ON u.id = p.author_user_id
 WHERE p.page_id = :page_id
   AND p.is_published = 1
+  AND (p.published_at IS NULL OR p.published_at <= :now)
 LIMIT 1

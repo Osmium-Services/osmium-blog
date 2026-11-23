@@ -24,9 +24,29 @@ class BlogPost extends Model
         $sql = $this->loadSqlFile('blog-post-get-published-by-page.sql');
         $this->database->query($sql);
         $this->database->bind(param: ':page_id', value: $pageId);
+        $this->bindNow();
         $post = $this->database->single();
 
         return $post === false ? null : $post;
+    }
+
+    /** The moment "live" is judged against: PHP's clock, the same one that stamps published_at */
+    private function bindNow(): void
+    {
+        $this->database->bind(param: ':now', value: \date('Y-m-d H:i:s'));
+    }
+
+    /**
+     * Page ids of posts that are published but dated in the future: a scheduled post is not live, so the sitemap leaves it out
+     *
+     * @return array<int, int>
+     */
+    public function scheduledPageIds(): array
+    {
+        $this->database->query($this->loadSqlFile('blog-post-list-scheduled.sql'));
+        $this->bindNow();
+
+        return \array_map('intval', \array_column($this->database->resultset(), 'page_id'));
     }
 
     /**
@@ -154,6 +174,7 @@ class BlogPost extends Model
     public function linkTargets(): array
     {
         $this->database->query($this->loadSqlFile('blog-link-targets.sql'));
+        $this->bindNow();
 
         return $this->database->resultset();
     }
@@ -162,13 +183,14 @@ class BlogPost extends Model
      * Published posts, newest first, for the blog index and a theme's "latest posts". Each row has
      * id, excerpt, link_text (the wording for the post's link, or null), hero_image, published_at, url (the page address without a leading slash - link
      * with $urls->to('/' . $url . '/')), title and the author's first_name and last_name. Posts dated
-     * in the future stay hidden until their time.
+     * in the future (scheduled) stay hidden until their time.
      */
     public function published(int $limit, int $offset = 0): array
     {
         $this->database->query($this->loadSqlFile('blog-post-list-published.sql'));
         $this->database->bind(param: ':limit', value: $limit, type: \PDO::PARAM_INT);
         $this->database->bind(param: ':offset', value: $offset, type: \PDO::PARAM_INT);
+        $this->bindNow();
 
         return $this->database->resultset();
     }
@@ -181,6 +203,7 @@ class BlogPost extends Model
     public function countPublished(): int
     {
         $this->database->query($this->loadSqlFile('blog-post-count-published.sql'));
+        $this->bindNow();
 
         return (int) ($this->database->single()['total'] ?? 0);
     }

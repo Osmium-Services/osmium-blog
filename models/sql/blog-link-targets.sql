@@ -15,5 +15,5 @@ LEFT JOIN {TABLE} bp ON bp.page_id = pg.id
 WHERE pg.deleted_at IS NULL
   AND pg.url <> 'error'
   AND pg.id NOT IN (SELECT page_id FROM {PREFIX}products_pages WHERE is_qr = 1)
-  AND (bp.id IS NULL OR bp.is_published = 1)
+  AND (bp.id IS NULL OR (bp.is_published = 1 AND (bp.published_at IS NULL OR bp.published_at <= :now)))
 ORDER BY type, pg.title, pg.url

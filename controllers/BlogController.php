@@ -299,18 +299,14 @@ class BlogController extends AdminController
     }
 
     /**
-     * Publishing stamps the date once; a date typed into the editor wins, but never a future one: a published
-     * post is live now (no scheduling), so a draft is the only unpublished state and the only noindex one
+     * Publishing stamps the date once; a date typed into the editor wins. A published post with a future date is
+     * scheduled: it goes live (page, index, sitemap) when that time arrives, with nothing else to do
      */
     private function publishedAt(array $input, bool $isPublished): ?string
     {
         $typed = \trim((string) ($input['published_at'] ?? ''));
         $typedTime = $typed === '' ? false : \strtotime($typed);
-        if ($typedTime !== false) {
-            $time = $isPublished ? \min($typedTime, \time()) : $typedTime;
-
-            return \date('Y-m-d H:i:s', $time);
-        }
+        if ($typedTime !== false) return \date('Y-m-d H:i:s', $typedTime);
 
         return $isPublished ? \date('Y-m-d H:i:s') : null;
     }
@@ -349,6 +345,7 @@ class BlogController extends AdminController
         $trailingSlash = $this->osmium->config->site->urlTrailingSlash ?? false;
         $author = \trim(($post['first_name'] ?? '') . ' ' . ($post['last_name'] ?? ''));
         $date = $post['published_at'] ?? $post['updated_at'];
+        $isScheduled = $isPublished && !empty($post['published_at']) && \strtotime($post['published_at']) > \time();
 
         return $post + [
             'url_path' => '/' . $post['url'] . ($trailingSlash ? '/' : ''),
@@ -356,8 +353,8 @@ class BlogController extends AdminController
             'author_name' => $author,
             'hero_thumb_list' => $this->heroThumb((string) ($post['hero_image'] ?? ''), 'list'),
             'hero_thumb_grid' => $this->heroThumb((string) ($post['hero_image'] ?? ''), 'grid'),
-            'status_label' => $isPublished ? 'Published' : 'Draft',
-            'status_class' => $isPublished ? 'success' : 'secondary',
+            'status_label' => $isScheduled ? 'Scheduled' : ($isPublished ? 'Published' : 'Draft'),
+            'status_class' => $isScheduled ? 'info' : ($isPublished ? 'success' : 'secondary'),
             'date_label' => $date ? \date('j M Y', \strtotime($date)) : '',
             'date_sort' => (string) $date,
         ];

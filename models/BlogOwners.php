@@ -39,10 +39,15 @@ class BlogOwners
      * The blog's posts and index page, for the `sitemap.groups` hook: one child sitemap of its own.
      *
      * @param array{dataSource: object} $payload
-     * @return array{key: string, label: string, pageIds: array<int, int>}
+     * @return array{key: string, label: string, pageIds: array<int, int>, hiddenPageIds: array<int, int>}
      */
     public static function sitemapGroups(array $payload): array
     {
-        return ['key' => 'blog', 'label' => 'Blog', 'pageIds' => \array_keys(self::owned($payload['dataSource']))];
+        return [
+            'key' => 'blog',
+            'label' => 'Blog',
+            'pageIds' => \array_keys(self::owned($payload['dataSource'])),
+            'hiddenPageIds' => (new BlogPost($payload['dataSource']))->scheduledPageIds(), // Scheduled posts join the sitemap when their time comes
+        ];
     }
 }
