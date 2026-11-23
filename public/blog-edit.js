@@ -234,6 +234,7 @@
                 const data = await uploadImage(file);
                 value.value = data.url;
                 show();
+                trackChanges();
             } catch (error) {
                 showResult(error.message, 'danger');
             }
@@ -263,6 +264,7 @@
         remove.addEventListener('click', function () {
             value.value = '';
             show();
+            trackChanges();
         });
     }
 
@@ -328,18 +330,12 @@
         if (!slugTouched) slugInput.value = slugify(titleInput.value);
     });
 
-    form.addEventListener('submit', async function (event) {
-        event.preventDefault();
-        saveButton.disabled = true;
-
-        const body = sanitize($('#blogBody').summernote('code'));
-        const payload = {
-            csrf_token: window.csrfToken,
-            action: 'save',
-            id: Number(document.getElementById('blogId').value) || 0,
+    // What Save sends, bar the request details
+    function formValues() {
+        return {
             title: titleInput.value,
             slug: slugInput.value,
-            body: body,
+            body: sanitize($('#blogBody').summernote('code')),
             description: document.getElementById('blogDescription').value,
             excerpt: document.getElementById('blogExcerpt').value,
             link_text: document.getElementById('blogLinkText').value,
@@ -349,6 +345,27 @@
             is_published: document.getElementById('blogPublished').checked,
             published_at: document.getElementById('blogPublishedAt').value
         };
+    }
+
+    // The admin's unsaved-changes warning reads window.hasUnsavedChanges. Its form tracker compares named fields and
+    // this form has none, so compare what Save would send against what the page loaded with.
+    const loadedValues = JSON.stringify(formValues());
+    function trackChanges() {
+        window.hasUnsavedChanges = JSON.stringify(formValues()) !== loadedValues;
+    }
+    form.addEventListener('input', trackChanges);
+    form.addEventListener('change', trackChanges);
+    $('#blogBody').on('summernote.change', trackChanges);
+
+    form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        saveButton.disabled = true;
+
+        const payload = Object.assign({
+            csrf_token: window.csrfToken,
+            action: 'save',
+            id: Number(document.getElementById('blogId').value) || 0
+        }, formValues());
 
         try {
             const response = await fetch(actionUrl, {
@@ -365,6 +382,7 @@
             }
 
             // Go to the post by id: the page shows the same saved bar as every other edit screen
+            window.hasUnsavedChanges = false;
             window.location.href = config.editUrl + '?id=' + data.id;
         } catch (error) {
             showResult('Could not save the post.', 'danger');
