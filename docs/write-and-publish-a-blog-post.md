@@ -1,6 +1,7 @@
 ---
 title: Write and publish a blog post
 tags: blog, post, publish, schedule, draft, image, author, excerpt, seo, meta description
+page: admin/blog, admin/blog/add, admin/blog/edit*
 ---
 
 Blog posts are written in **Osmium Blog** and published as ordinary pages on your site.

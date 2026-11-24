@@ -1,6 +1,7 @@
 ---
 title: Delete a blog post, and blog settings
 tags: blog, delete, restore, redirect, settings, section, address, default author
+page: admin/settings/blog
 ---
 
 ## Delete a post
