@@ -26,11 +26,11 @@ class BlogOwners
 
         $owned = [];
         foreach ($posts->ownedPages() as $row) {
-            $owned[(int) $row['page_id']] = ['label' => 'Blog', 'editUrl' => 'blog/edit/?id=' . (int) $row['id']];
+            $owned[(int) $row['page_id']] = ['label' => 'Blog post', 'editUrl' => 'blog/edit/?id=' . (int) $row['id']];
         }
 
         $indexPageId = $posts->indexPageId(BlogSettings::indexSlug());
-        if ($indexPageId !== null) $owned[$indexPageId] = ['label' => 'Blog', 'editUrl' => 'blog/'];
+        if ($indexPageId !== null) $owned[$indexPageId] = ['label' => 'Blog index', 'editUrl' => 'blog/'];
 
         return $owned;
     }
