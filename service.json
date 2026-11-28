@@ -1,7 +1,7 @@
 {
     "id": "osmium-blog",
     "name": "Osmium Blog",
-    "version": "0.16.3",
+    "version": "0.17.0",
     "description": "Blog posts written in admin and published as ordinary pages under /blog/, with the markup supplied by the theme",
     "category": "content",
     "author": {
@@ -35,6 +35,9 @@
         ],
         "adminbar.links": [
             "Osmium\\Services\\Blog\\Models\\BlogAdminBar::links"
+        ],
+        "dashboard.quick_links": [
+            "Osmium\\Services\\Blog\\Models\\BlogDashboardLinks::quickLink"
         ]
     },
     "admin": {
